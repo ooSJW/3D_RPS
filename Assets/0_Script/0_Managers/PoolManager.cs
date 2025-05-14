@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class PoolManager : MonoBehaviour, ManagerBase
+public class PoolManager : MonoBehaviour, IManagerBase
 {
     public bool IsInit { get;  set; }
 

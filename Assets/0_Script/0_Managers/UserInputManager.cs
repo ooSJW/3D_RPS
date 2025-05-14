@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class UserInputManager : MonoBehaviour, ManagerBase
+public class UserInputManager : MonoBehaviour, IManagerBase
 {
     public bool IsInit { get;  set; }
 

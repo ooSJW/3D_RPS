@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class WorldManager : MonoBehaviour, ManagerBase
+public class WorldManager : MonoBehaviour, IManagerBase
 {
     public bool IsInit { get;  set; }
 

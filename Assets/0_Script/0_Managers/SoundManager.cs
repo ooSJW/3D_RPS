@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class SoundManager : MonoBehaviour, ManagerBase
+public class SoundManager : MonoBehaviour, IManagerBase
 {
     public bool IsInit { get;  set; }
 

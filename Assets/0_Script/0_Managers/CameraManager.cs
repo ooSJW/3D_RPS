@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class CameraManager : MonoBehaviour, ManagerBase
+public class CameraManager : MonoBehaviour, IManagerBase
 {
     public bool IsInit { get; set; }
 
