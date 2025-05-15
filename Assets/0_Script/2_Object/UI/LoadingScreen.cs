@@ -20,14 +20,14 @@ public partial class LoadingScreen : MonoBehaviour, IUserInterfaceBase// Initial
 {
     public void Initialize(UIManager uiManager)
     {
-        UIManager.OnLoadingStart -= OnLoadingStart;
-        UIManager.OnLoadingStart += OnLoadingStart;
+        UIManager.OnLoadingStart -= LoadingStart;
+        UIManager.OnLoadingStart += LoadingStart;
 
-        UIManager.OnLoadingNext -= OnLoadingNext;
-        UIManager.OnLoadingNext += OnLoadingNext;
+        UIManager.OnLoadingNext -= LoadingNext;
+        UIManager.OnLoadingNext += LoadingNext;
 
-        UIManager.OnLoadingDone -= OnLoadingDone;
-        UIManager.OnLoadingDone += OnLoadingDone;
+        UIManager.OnLoadingDone -= LoadingDone;
+        UIManager.OnLoadingDone += LoadingDone;
     }
 
     public bool Active(bool value)
@@ -48,25 +48,39 @@ public partial class LoadingScreen : MonoBehaviour, IUserInterfaceBase// Initial
 
     public void Exit()
     {
-        UIManager.OnLoadingStart -= OnLoadingStart;
-        UIManager.OnLoadingNext -= OnLoadingNext;
-        UIManager.OnLoadingDone -= OnLoadingDone;
+        UIManager.OnLoadingStart -= LoadingStart;
+        UIManager.OnLoadingNext -= LoadingNext;
+        UIManager.OnLoadingDone -= LoadingDone;
     }
 }
 public partial class LoadingScreen : MonoBehaviour, IUserInterfaceBase // Property
 {
-    private void OnLoadingStart(int processAmount)
+    private void LoadingStart(int processAmount)
     {
+        currentAmount = 0;
+        maxAmount = processAmount;
+        Visualize("TEST", Progress);
+
         Open(true);
     }
 
-    private void OnLoadingNext(string loadingContext, int skipAmount)
+    private void LoadingNext(string loadingContext, int skipAmount)
     {
-
+        currentAmount += skipAmount;
+        Visualize(loadingContext, Progress);
     }
 
-    private void OnLoadingDone()
+    private void LoadingDone()
     {
         Open(false);
+    }
+
+    private void Visualize(string context, float progress)
+    {
+        loadingText.text = context;
+        loadingSlider.value = progress;
+
+        // Quaternion.AngleAxis(회전시킬 각도, 기준 축);
+        loadingImage.transform.rotation = Quaternion.AngleAxis(progress * 1080.0f, Vector3.forward);
     }
 }
