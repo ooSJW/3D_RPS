@@ -64,12 +64,10 @@ public class Unions
         get => new byte[4] { byte0, byte1, byte2, byte3 };
         set
         {
-            if (value.Length != 4) return;
-
-            byte0 = value[0];
-            byte1 = value[1];
-            byte2 = value[2];
-            byte3 = value[3];
+            if (value.Length > 0) byte0 = value[0];
+            if (value.Length > 1) byte0 = value[1];
+            if (value.Length > 2) byte0 = value[2];
+            if (value.Length > 3) byte0 = value[3];
         }
     }
 }
