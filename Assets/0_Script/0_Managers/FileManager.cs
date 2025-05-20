@@ -8,6 +8,8 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Data Field
 {
     public bool IsInit { get; protected set; }
 
+    public static GraphicOptionValues SavedGraphicOptions { get; private set; }
+
     private string mainDirectory;
     private string saveDirectory;
     private string optionDirectory;
@@ -17,45 +19,24 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Initialize
 {
     public IEnumerator Initialize()
     {
-        GraphicOptionValues test = new()
-        {
-            test1 = "bcdbcdbcd",
-            test2 = "aba",
-            resolutionType = GraphicOptionValues.ResolutionType._800x480,
-            frameRate = 1,
-            graphicLevel = 2,
-            brightness = 3,
-            shadowLevel = 4,
-            contrast = 5.0f,
-            verticalSynchronization = false,
-            antiAliasing = true,
-            fullScreen = false,
-        };
-        foreach (byte current in test.Struct2ByteArray())
-        {
-           Debug.Log(current);
-        }
-
-        GraphicOptionValues test2 = test.Struct2ByteArray().ByteArray2Struct<GraphicOptionValues>();
-        Debug.Log($"test2.test1:{test2.test1}");
-        Debug.Log($"test2.test2:{test2.test2}");
-        Debug.Log($"test2.antiAliasing:{test2.antiAliasing}");
-        Debug.Log($"test2.brightness:{test2.brightness}");
-        Debug.Log($"test2.contrast:{test2.contrast}");
-        Debug.Log($"test2.frameRate:{test2.frameRate}");
-        Debug.Log($"test2.fullScreen:{test2.fullScreen}");
-        Debug.Log($"test2.graphicLevel:{test2.graphicLevel}");
-        Debug.Log($"test2.shadowLevel:{test2.shadowLevel}");
-        Debug.Log($"test2.verticalSynchronization:{test2.verticalSynchronization}");
-
-
         // 응용 프로그램이 사용하는 데이터 경로 : Application.persistentDataPath
         // Application.persistentDataPath : 런타임에 결정되기 때문에 런타임에 사용 가능, 기본값에서 사용 불가능.
         mainDirectory = $"{Application.persistentDataPath}/Datas";
         saveDirectory = $"{mainDirectory}/Saves";
         optionDirectory = $"{mainDirectory}/Options";
 
-        SaveFile(saveDirectory, "TestFile.sav", Serialize("가나다라마바사아", 10, 98.5f));
+        try
+        {
+            SavedGraphicOptions = LoadFile(optionDirectory, "GraphicSettings.set").ByteArray2Struct<GraphicOptionValues>();
+        }
+        catch
+        {
+            SavedGraphicOptions = GraphicOptionValues.defaultOption;
+            // TODO 아랫 줄 그냥 내가 써놓음 바뀔 수 있음
+            SaveFile(optionDirectory, "GraphicSettings.set", SavedGraphicOptions.Struct2ByteArray()); 
+            Debug.LogWarning("GraphicSetting File Not Found");
+        }
+
         yield break;
     }
     public void Exit()
@@ -70,6 +51,9 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
     {
         return Resources.Load<GameObject>(path);
     }
+
+
+    // HxD를 통해 저장한 파일을 읽어볼 수 있음.
     public static void SaveFile(string directory, string fileName, params byte[] data)
     {
         // params : 가변 매개변수, 매개변수를 넣지 않거나  ,로 구분하여 넣거나 byme[]을 매개변수로 넣을 수 있음;
@@ -95,6 +79,7 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
         return null;
     }
 
+    // Serilaize() <= 구현만 해보고 안씀.
     public byte[] Serialize(string name, int level, float exp)
     {
         // ↓↓ name의 최대 크기는 6으로 확정지은 상황 ↓↓

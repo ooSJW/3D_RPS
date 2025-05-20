@@ -79,13 +79,21 @@ public static class Extensions
 
     public static T ByteArray2Struct<T>(this byte[] originArray)
     {
+        // throw는 try-catch문 안에서만 사용 가능.
+        // 에디터에서 실행할 때 유니티 자체적으로 try-catch를 사용해 실행시킴
+        // throw발생 시 현재 실행중이던 함수만 끝내고 콘솔창에 Exception을 보여줌 
+
+        if (originArray.Length == 0)
+            throw new Exception("[ByteArray2Struct Error] OriginArray Has Not Value");
+
+
         Type resultType = typeof(T);
         if (!resultType.IsStruct()) return default;
 
         FieldInfo[] allFields = resultType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         allFields = allFields.OrderBy(currentField => Marshal.OffsetOf(resultType, currentField.Name).ToInt32()).ToArray();
 
-        T result = Activator.CreateInstance<T>();
+        object result = Activator.CreateInstance<T>();
 
         int offset = 0;
 
@@ -110,7 +118,7 @@ public static class Extensions
         }
 
 
-        return result;
+        return (T)result;
     }
 
 

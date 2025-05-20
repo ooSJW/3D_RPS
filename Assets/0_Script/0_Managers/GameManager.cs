@@ -28,26 +28,35 @@ public partial class GameManager : MonoBehaviour, IManagerBase
 {
     public IEnumerator Initialize()
     {
-        yield return AddManager(uiManager);
+        //yield return AddManager(uiManager);
+
+        uiManager = gameObject?.AddComponent<UIManager>();
+        yield return uiManager?.Initialize();
         UIManager.ClaimLoadingStart(6);
 
         UIManager.ClaimLoadingNext("파일");
-        yield return AddManager(fileManager);
+        fileManager = gameObject?.AddComponent<FileManager>();
+        yield return fileManager?.Initialize();
 
         UIManager.ClaimLoadingNext("세이브");
-        yield return AddManager(saveManager);
+        saveManager = gameObject?.AddComponent<SaveManager>();
+        yield return saveManager?.Initialize();
 
         UIManager.ClaimLoadingNext("옵션");
-        yield return AddManager(optionManager);
+        optionManager = gameObject?.AddComponent<OptionManager>();
+        yield return optionManager?.Initialize();
 
         UIManager.ClaimLoadingNext("사운드");
-        yield return AddManager(soundManager);
+        soundManager = gameObject?.AddComponent<SoundManager>();
+        yield return soundManager?.Initialize();
 
         UIManager.ClaimLoadingNext("카메라");
-        yield return AddManager(cameraManager);
+        cameraManager = gameObject?.AddComponent<CameraManager>();
+        yield return cameraManager?.Initialize();
 
         UIManager.ClaimLoadingNext("입력");
-        yield return AddManager(userInputManager);
+        userInputManager = gameObject?.AddComponent<UserInputManager>();
+        yield return userInputManager?.Initialize();
 
         UIManager.ClaimLoadingDone();
         isInit = true;

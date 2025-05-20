@@ -64,10 +64,34 @@ public class Unions
         get => new byte[4] { byte0, byte1, byte2, byte3 };
         set
         {
-            if (value.Length > 0) byte0 = value[0];
-            if (value.Length > 1) byte0 = value[1];
-            if (value.Length > 2) byte0 = value[2];
-            if (value.Length > 3) byte0 = value[3];
+            int maxLength = Mathf.Min(4, value.Length);
+            for (int i = 0; i < maxLength; i++) this[i] = value[i];
         }
+    }
+
+    public byte this[int index]
+    {
+        get
+        {
+            switch (index)
+            {
+                case 0: return byte0;
+                case 1: return byte1;
+                case 2: return byte2;
+                case 3: return byte3;
+                default: return (byte)0;
+            }
+        }
+        set
+        {
+            switch (index)
+            {
+                case 0: byte0 = value; break;
+                case 1: byte1 = value; break;
+                case 2: byte2 = value; break;
+                case 3: byte3 = value; break;
+            }
+        }
+
     }
 }
