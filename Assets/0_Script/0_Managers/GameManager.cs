@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public partial class GameManager : MonoBehaviour, IManagerBase // Data Field
 {
@@ -26,9 +27,15 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Data Field
 
 public partial class GameManager : MonoBehaviour, IManagerBase
 {
+
+    // GameManager 유니티에 연결 및 씬이 변경되었을 때 사용할 함수 등록
     public IEnumerator Initialize()
     {
         //yield return AddManager(uiManager);
+        SceneManager.sceneLoaded -= SceneLoaded;
+        SceneManager.sceneLoaded += SceneLoaded;
+        SceneManager.sceneUnloaded -= SceneUnloaded;
+        SceneManager.sceneUnloaded += SceneUnloaded;
 
         uiManager = gameObject?.AddComponent<UIManager>();
         yield return uiManager?.Initialize();
@@ -64,6 +71,10 @@ public partial class GameManager : MonoBehaviour, IManagerBase
 
     public void Exit()
     {
+        SceneManager.sceneLoaded -= SceneLoaded;
+        SceneManager.sceneUnloaded -= SceneUnloaded;
+
+
         if (initializer is null && isInit == false)
             StopCoroutine(initializer);
 
@@ -74,10 +85,11 @@ public partial class GameManager : MonoBehaviour, IManagerBase
         saveManager?.Exit();
         fileManager?.Exit();
         uiManager?.Exit();
+
     }
 }
 
-public partial class GameManager : MonoBehaviour, IManagerBase
+public partial class GameManager : MonoBehaviour, IManagerBase // Property
 {
     private IEnumerator AddManager<T>(T slot) where T : IManagerBase
     {
@@ -95,6 +107,16 @@ public partial class GameManager : MonoBehaviour, IManagerBase
 
         if (slot is not null)
             yield return slot.Initialize();
+    }
+
+    public void SceneLoaded(Scene loadedScene, LoadSceneMode loadSceneMode)
+    {
+        cameraManager?.SceneLoaded(loadedScene, loadSceneMode);
+    }
+
+    public void SceneUnloaded(Scene unloadedScene)
+    {
+
     }
 }
 

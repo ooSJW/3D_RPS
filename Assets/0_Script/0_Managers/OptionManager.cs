@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public struct GraphicOptionValues
 {
@@ -27,12 +29,13 @@ public struct GraphicOptionValues
 
     // public string version : 버전 변경 시 호환을 위해 사용할 수 있는 변수.
     public ResolutionType resolutionType;
-    public ShadowQuality shadowLevel;
+    public UnityEngine.ShadowQuality shadowLevel;
     public AntiAliasingSampling antiAliasing;
     public int frameRate;
     public int graphicLevel;
     public int brightness;
     public float contrast;
+    public float fieldOfView;
     public bool verticalSynchronization;
     public bool fullScreen;
 
@@ -40,26 +43,35 @@ public struct GraphicOptionValues
     {
         // 그래픽 설정 기본 세팅 값
         resolutionType = GraphicOptionValues.ResolutionType._1920x1080,
-        shadowLevel = ShadowQuality.All,
+        shadowLevel = UnityEngine.ShadowQuality.All,
         antiAliasing = AntiAliasingSampling.MSAA_4X,
         frameRate = 65,
         graphicLevel = 2, // Project settings -> Quality -> setting의 순서를 뜻함
-        brightness = 4,
-        contrast = 0.2f,
+        brightness = 5,
+        contrast = 0.4f,
+        fieldOfView = 90f,
         verticalSynchronization = false,
         fullScreen = true,
     };
 }
 
+public delegate void DelegateGraphicOptionChanged(GraphicOptionValues value);
 public partial class OptionManager : MonoBehaviour, IManagerBase // Data Field
 {
     public bool IsInit { get; set; }
+
+    public static event DelegateGraphicOptionChanged OnGraphicOptionChanged;
+    public static GraphicOptionValues appliedGraphicOption;
+
+    private Volume optionVolume;
+    private ColorAdjustments adjustment;
 }
 
 public partial class OptionManager : MonoBehaviour, IManagerBase // Initialize
 {
     public IEnumerator Initialize()
     {
+        CreateVolume();
         ApplyGraphicSetting(FileManager.SavedGraphicOptions);
         yield break;
     }
@@ -70,6 +82,8 @@ public partial class OptionManager : MonoBehaviour, IManagerBase // Initialize
 
     public void ApplyGraphicSetting(GraphicOptionValues value)
     {
+        appliedGraphicOption = value;
+
         // resolution , fullScreen
         Vector2Int resolution = GetResolution(value.resolutionType);
         Screen.SetResolution(resolution.x, resolution.y, value.fullScreen);
@@ -100,8 +114,22 @@ public partial class OptionManager : MonoBehaviour, IManagerBase // Initialize
         // 색체 작업은 pixel Shader단계에서 작업이 완료되기 때문에 이후 순서인 Post Process단계에서 밝기, 대비 조절 가능
         // brightness
         // contrast
-    }
+        if (adjustment)
+        {
+            // Linear IntERPolate : LERP 선형 보간 => 두 값 사이를 직선으로 보간
+            // ((1-x) * A) + (X * b)
 
+            // Slerp : 구형 보간 => 두 값 사이를 구체 형태로 보간
+
+            adjustment.contrast.overrideState = true;
+            adjustment.postExposure.overrideState = true;
+
+            adjustment.contrast.value = Mathf.Lerp(-20, 30, value.contrast);
+            adjustment.postExposure.value = Mathf.Lerp(-1, 1f, value.brightness / 10f);
+        }
+
+        OnGraphicOptionChanged?.Invoke(value);
+    }
 }
 
 public partial class OptionManager : MonoBehaviour, IManagerBase // 
@@ -139,5 +167,19 @@ public partial class OptionManager : MonoBehaviour, IManagerBase //
             }
         }
         return CalulateResolution(GraphicOptionValues.defaultOption.resolutionType);
+    }
+
+    private void CreateVolume()
+    {
+        optionVolume = gameObject.AddComponent<Volume>();
+        optionVolume.isGlobal = true;
+        optionVolume.priority = -1f;
+
+        // Volume의 Profile == ScriptableObject
+        VolumeProfile profile = ScriptableObject.CreateInstance<VolumeProfile>();
+
+        adjustment = profile.Add<ColorAdjustments>(true);
+
+        optionVolume.profile = profile;
     }
 }
