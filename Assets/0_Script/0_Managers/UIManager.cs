@@ -15,11 +15,13 @@ using UnityEngine.UI;
 // 해당 상황에서는 반환 값이 없으며 매개변수가 int 하나인 함수를 담을 수 있는 형태
 public delegate void DelegateLoadingStart(int processAmount);
 public delegate void DelegateLoadingNext(string loadingContext, int skipAmount);
+public delegate void DelegateLoadingProgress(string loadingText, float progress);
 public delegate void DelegateLoadingDone();
 
 public partial class UIManager : MonoBehaviour, IManagerBase // Data Field
 {
     public static event DelegateLoadingStart OnLoadingStart;
+    public static event DelegateLoadingProgress OnLoadingProgress;
     public static event DelegateLoadingNext OnLoadingNext;
     public static event DelegateLoadingDone OnLoadingDone;
 
@@ -119,6 +121,11 @@ public partial class UIManager : MonoBehaviour, IManagerBase // Delegate
     public static void ClaimLoadingStart(int processAmount)
     {
         OnLoadingStart?.Invoke(processAmount);
+    }
+
+    public static void ClaimLoadingProgress(string loadingContext, float progress)
+    {
+        OnLoadingProgress?.Invoke(loadingContext, progress);
     }
 
     public static void ClaimLoadingNext(string loadingContext, int skipAmount = 1)

@@ -485,7 +485,7 @@
                 {
                     "name": "down",
                     "id": "4402a299-01bf-46eb-b8f5-878a17f1549b",
-                    "path": "<Keyboard>/a",
+                    "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -496,7 +496,7 @@
                 {
                     "name": "left",
                     "id": "cba9c56f-f723-43f1-805f-06c402552361",
-                    "path": "<Keyboard>/s",
+                    "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

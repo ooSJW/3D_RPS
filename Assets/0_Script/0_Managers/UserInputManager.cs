@@ -2,9 +2,43 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
+public delegate void DelegateInputAction();
+public delegate void DelegateInputPress(bool inputValue);
+public delegate void DelegateInputFlot(float inputValue);
+public delegate void DelegateInput2D(Vector2 inputValue);
+
+
 public partial class UserInputManager : MonoBehaviour, IManagerBase // Data Field
 {
     public bool IsInit { get; set; }
+
+    public static event DelegateInput2D OnMoveInput;
+    public static event DelegateInput2D OnLookInput;
+
+    public static event DelegateInputAction OnJumpInput;
+    public static event DelegateInputAction OnInteractionInput;
+    public static event DelegateInputAction OnInventoryInput;
+    public static event DelegateInputAction OnReloadInput;
+    public static event DelegateInputAction OnFlashLightInput;
+    public static event DelegateInputAction OnChangeModeInput;
+    public static event DelegateInputAction OnCancelInput;
+    public static event DelegateInputAction OnConfirmInput;
+    public static event DelegateInputAction OnMenuInput;
+    public static event DelegateInputAction OnBackInput;
+    public static event DelegateInputAction OnWeapon0Input;
+    public static event DelegateInputAction OnWeapon1Input;
+    public static event DelegateInputAction OnWeapon2Input;
+    public static event DelegateInputAction OnWeapon3Input;
+
+    public static event DelegateInputFlot OnChangeWeaponInput;
+
+    public static event DelegateInputPress OnRunInput;
+    public static event DelegateInputPress OnAttackInput;
+    public static event DelegateInputPress OnCrouchInput;
+    public static event DelegateInputPress OnZoomInput;
+
+
 }
 
 public partial class UserInputManager : MonoBehaviour, IManagerBase
@@ -25,86 +59,94 @@ public partial class UserInputManager : MonoBehaviour, IManagerBase
     // confirm, menu, weapon0~3, changeWeapon, run, attack, crouch, zoom
     private void OnMove(InputValue value)
     {
-        Debug.Log("Move Input");
+        Vector2 inputValue = value.Get<Vector2>();
+        OnMoveInput?.Invoke(inputValue);
     }
     private void OnLook(InputValue value)
     {
-        Debug.Log("Look Input");
+        Vector2 inputValue = value.Get<Vector2>();
+        OnLookInput?.Invoke(inputValue);
     }
     private void OnJump()
     {
-        Debug.Log("Jump Input");
+        OnJumpInput?.Invoke();
     }
     private void OnInventory()
     {
-        Debug.Log("Invectory Input");
+        OnInventoryInput?.Invoke();
     }
     private void OnInteraction()
     {
-        Debug.Log("Interaction Input");
+        OnInteractionInput?.Invoke();
     }
     private void OnChangeMode()
     {
-        Debug.Log("CahngeMode Input");
+        OnChangeModeInput?.Invoke();
     }
     private void OnReload()
     {
-        Debug.Log("Reload Input");
+        OnReloadInput?.Invoke();
     }
     private void OnFlashLight()
     {
-        Debug.Log("FlashLigh Input");
+        OnFlashLightInput?.Invoke();
     }
     private void OnCancel()
     {
-        Debug.Log("Cancel Input");
+        OnCancelInput?.Invoke();
     }
     private void OnBack()
     {
-        Debug.Log("Back Input");
+        OnBackInput?.Invoke();
     }
     private void OnMenu()
     {
-        Debug.Log("Menu Input");
+        OnMenuInput?.Invoke();
     }
     private void OnConfirm()
     {
-        Debug.Log("Confirm Input");
+        OnConfirmInput?.Invoke();
     }
     private void OnWeapon0()
     {
-        Debug.Log("Weapon0 Input");
+        OnWeapon0Input?.Invoke();
     }
     private void OnWeapon1()
     {
-        Debug.Log("Weapon1 Input");
+        OnWeapon1Input?.Invoke();
     }
     private void OnWeapon2()
     {
-        Debug.Log("Weapon2 Input");
+        OnWeapon2Input?.Invoke();
     }
     private void OnWeapon3()
     {
-        Debug.Log("Weapon3 Input");
+        OnWeapon3Input?.Invoke();
     }
     private void OnChangeWeapon(InputValue value)
     {
-        Debug.Log("ChangeWeapon Input");
+        float inputValue = value.Get<float>();
+        OnChangeWeaponInput?.Invoke(inputValue);
     }
     private void OnRun(InputValue value)
     {
-        Debug.Log("Run Input");
+        bool isPressed = value.isPressed;
+        OnRunInput?.Invoke(isPressed);
     }
     private void OnAttack(InputValue value)
     {
-        Debug.Log("Attack Input");
+        bool isPressed = value.isPressed;
+        OnAttackInput?.Invoke(isPressed);
     }
     private void OnCrouch(InputValue value)
     {
-        Debug.Log("Crouch Input");
+        bool isPressed = value.isPressed;
+        OnCrouchInput?.Invoke(isPressed);
     }
     private void OnZoom(InputValue value)
     {
-        Debug.Log("Zoom Input");
+        bool isPressed = value.isPressed;
+        OnZoomInput?.Invoke(isPressed);
     }
 }
+

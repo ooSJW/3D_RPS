@@ -1,19 +1,26 @@
 using JetBrains.Annotations;
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static UnityEngine.Rendering.HDROutputUtils;
 
 public partial class GameManager : MonoBehaviour, IManagerBase // Data Field
 {
     private static GameManager instance;
+    public static GameManager Instance { get => instance; }
+
+    // private const string initializeSceneName = "ZTESTScene";
+    [SerializeField] private string initializeSceneName;
 
     private bool isInit = false;
     public bool IsInit { get => isInit; protected set => isInit = value; }
     private IEnumerator initializer;
 
-
+    public Scene CurrentScene { get; private set; }
+    private AsyncOperation sceneLoadProgress;
 
     private UIManager uiManager;
     private FileManager fileManager;
@@ -66,6 +73,17 @@ public partial class GameManager : MonoBehaviour, IManagerBase
         yield return userInputManager?.Initialize();
 
         UIManager.ClaimLoadingDone();
+
+#if UNITY_EDITOR
+        // 정상적인 경로로 시작된 상황
+        if (SceneManager.sceneCount == 1)
+
+#endif
+            // 저장해놓은 Task는 Start나 Task.Run을 사용해야함.
+            LoadSceneAsync(initializeSceneName);
+
+        UIManager.ClaimLoadingDone();
+
         isInit = true;
     }
 
@@ -73,7 +91,6 @@ public partial class GameManager : MonoBehaviour, IManagerBase
     {
         SceneManager.sceneLoaded -= SceneLoaded;
         SceneManager.sceneUnloaded -= SceneUnloaded;
-
 
         if (initializer is null && isInit == false)
             StopCoroutine(initializer);
@@ -111,6 +128,10 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Property
 
     public void SceneLoaded(Scene loadedScene, LoadSceneMode loadSceneMode)
     {
+        // 최초 GameManager를 가진 씬은 항상 0번으로 유지
+        if (loadedScene.buildIndex != 0)
+            CurrentScene = loadedScene;
+
         cameraManager?.SceneLoaded(loadedScene, loadSceneMode);
     }
 
@@ -118,7 +139,53 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Property
     {
 
     }
+
+    // Task : 쓰레드에게 시킬 일
+    public async Task LoadSceneAsync(string sceneName)
+    {
+        // 비동기 씬 로드
+        if (CurrentScene.isLoaded)
+        {
+            // await : 비동기 요청 후 완료될 때까지 대기
+            await SceneManager.UnloadSceneAsync(CurrentScene.buildIndex);
+        }
+
+        StartCoroutine(LoadingScene(sceneName));
+    }
+
+
+    private IEnumerator LoadingProgress(AsyncOperation operation, string loadingContext)
+    {
+        UIManager.ClaimLoadingStart(100);
+
+        while (!operation.isDone)
+        {
+            UIManager.ClaimLoadingProgress($"{loadingContext} : {operation.progress * 100f}%", operation.progress);
+            yield return null;
+        }
+
+        UIManager.ClaimLoadingDone();
+    }
+
+    private IEnumerator LoadingScene(string sceneName)
+    {
+        UIManager.ClaimLoadingStart(100);
+        sceneLoadProgress = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+        while (!sceneLoadProgress.isDone)
+        {
+            UIManager.ClaimLoadingProgress($"Loading {sceneName} : {sceneLoadProgress.progress * 100f}%", sceneLoadProgress.progress * 0.3f);
+            yield return null;
+        }
+
+        WorldManager worldManager = FindFirstObjectByType<WorldManager>();
+        if (worldManager is not null)
+            yield return worldManager.Initialize();
+
+        UIManager.ClaimLoadingDone();
+    }
 }
+
+
 
 public partial class GameManager : MonoBehaviour, IManagerBase
 {

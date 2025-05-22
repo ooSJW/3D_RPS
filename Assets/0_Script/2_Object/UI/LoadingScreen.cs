@@ -13,7 +13,13 @@ public partial class LoadingScreen : MonoBehaviour, IUserInterfaceBase // Data F
     private int currentAmount;
     private int maxAmount;
 
-    public float Progress => maxAmount <= 0 ? 1.0f : currentAmount / (float)maxAmount;
+    public float Progress
+    {
+        get => maxAmount <= 0 ? 1.0f : currentAmount / (float)maxAmount;
+        set => currentAmount = Mathf.RoundToInt(value * maxAmount);
+        // 반올림 할 때 Mathf.Round()를 사용하거나 값에 +0.5를 하는 방법도 있음
+        // 아마 Round() 내부적으로 +0.5하지않을까?
+    }
 }
 
 public partial class LoadingScreen : MonoBehaviour, IUserInterfaceBase// Initialize
@@ -22,6 +28,9 @@ public partial class LoadingScreen : MonoBehaviour, IUserInterfaceBase// Initial
     {
         UIManager.OnLoadingStart -= LoadingStart;
         UIManager.OnLoadingStart += LoadingStart;
+
+        UIManager.OnLoadingProgress -= LoadingProgress;
+        UIManager.OnLoadingProgress += LoadingProgress;
 
         UIManager.OnLoadingNext -= LoadingNext;
         UIManager.OnLoadingNext += LoadingNext;
@@ -49,6 +58,7 @@ public partial class LoadingScreen : MonoBehaviour, IUserInterfaceBase// Initial
     public void Exit()
     {
         UIManager.OnLoadingStart -= LoadingStart;
+        UIManager.OnLoadingProgress -= LoadingProgress;
         UIManager.OnLoadingNext -= LoadingNext;
         UIManager.OnLoadingDone -= LoadingDone;
     }
@@ -62,6 +72,12 @@ public partial class LoadingScreen : MonoBehaviour, IUserInterfaceBase // Proper
         Visualize("TEST", Progress);
 
         Open(true);
+    }
+
+    private void LoadingProgress(string loadingText, float progress)
+    {
+        Progress = progress;
+        Visualize(loadingText, progress);
     }
 
     private void LoadingNext(string loadingContext, int skipAmount)
