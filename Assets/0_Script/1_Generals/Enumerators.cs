@@ -17,3 +17,22 @@ public enum UIType
     Map,
     _LENGTH
 }
+
+public enum CharacterType
+{
+    CharacterBase,
+
+    ///
+    PlayerCharacterStart = 100,
+    PlayerCharacterEnd = 200,
+    ///
+    MonsterCharacterStart = 1000,
+    MonsterCharacterEnd = 10000,
+    ///
+
+}
+
+public enum ControllerType
+{
+    ControllerBase,
+}

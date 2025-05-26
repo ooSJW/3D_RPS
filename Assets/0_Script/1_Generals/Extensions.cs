@@ -1,11 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public static class Extensions
 {
@@ -253,4 +252,84 @@ public static class Extensions
     public static bool IsStruct(this Type checkType) => checkType.IsValueType && !checkType.IsPrimitive && !checkType.IsEnum;
 
     public static bool IsStruct<T>() => IsStruct(typeof(T));
+
+
+    public static T[] GetComponent<T>(this GameObject[] from) where T : Component
+    {
+        T[] result = new T[from.Length];
+        int index = 0;
+        foreach (GameObject currrent in from)
+        {
+            // 후위 연산자
+            // C# , java : 메모리에 접근 후 접근 해제 시 증감.
+            // C++ : 해당 줄이 끝난 후 한 번에 증감.
+
+            // 전위 연산 : 메모리에 가서 즉시 더하기 1함, 후위 연산 : 메모리에서 가져와 저장 후 다시 메모리로 가져가 더하기 1함
+            // 후위 연산자 : 임시 변수가 생기기 때문에 구조체나 클래스의 ++ --연산자를 오버로딩 할 때에는 전위 연산자 사용 지향.
+
+            // for문 에서 컴파일러는 ++i와 i++이 실제 어딘가 대입되거나 순서가 중요하지 않으면 정확히 같은 코드로 변환시킴.
+            result[index++] = currrent.GetComponent<T>();
+        }
+        return result;
+    }
+
+    public static void AddComponents<T>(this Dictionary<string, T[]> target, params GameObject[] objects)
+    {
+        foreach (GameObject currentObject in objects)
+        {
+            T currentComponent;
+            if (currentObject?.TryGetComponent<T>(out currentComponent) ?? false)
+            {
+                string currentName = currentObject.name;
+                if (target.ContainsKey(currentName))
+                {
+                    /*1 배열 새로 만든 후 복사
+                    T[] values = new T[target[currentObject.name].Length + 1];
+                    Array.Copy(target[currentObject.name], values, values.Length - 1);
+                    values[^1] = currentComponent;
+                    */
+
+                    /* 2 IEnumerable사용 (list생성 후 복사)
+                    // IEnumerable : 반복자를 생성할 수 있는 인터페이스
+                    // 반복자 : 자료 구조를 탐색하는 역할, 배열 리스트 딕셔너리 등..
+                    
+                    List<T> tempList = new(target[currentName]);
+                    tempList.Add(currentComponent);
+                    */
+
+                    // 3
+                    if (target[currentName].Contains(currentComponent))
+                        continue;
+
+                    target[currentName].Append(currentComponent);
+                }
+                else
+                {
+                    target.Add(currentName, new T[] { currentComponent });
+                }
+            }
+        }
+    }
+
+
+    public static T Get<T>(this T[] target, int index)
+    {
+        target.TryGet(index, out T result);
+
+        return result;
+    }
+
+
+    public static bool TryGet<T>(this T[] target, int index, out T result)
+    {
+        if (target.Length <= index || index < 0)
+        {
+            result = default;
+            return false;
+        }
+
+        result = target[index];
+        return true;
+    }
 }
+

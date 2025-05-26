@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
@@ -8,7 +9,10 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Data Field
 {
     public bool IsInit { get; protected set; }
 
-    public static GraphicOptionValues SavedGraphicOptions { get; private set; }
+    public static GraphicOptionValues SavedGraphicOptions { get; protected set; }
+
+    public static Dictionary<CharacterType, GameObject> CharacterPrefabDict { get; protected set; }
+    public static Dictionary<ControllerType, GameObject> ControllerPrefabDict { get; protected set; }
 
     private string mainDirectory;
     private string saveDirectory;
@@ -33,7 +37,7 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Initialize
         {
             SavedGraphicOptions = GraphicOptionValues.defaultOption;
             // TODO 아랫 줄 그냥 내가 써놓음 바뀔 수 있음
-            SaveFile(optionDirectory, "GraphicSettings.set", SavedGraphicOptions.Struct2ByteArray()); 
+            SaveFile(optionDirectory, "GraphicSettings.set", SavedGraphicOptions.Struct2ByteArray());
             Debug.LogWarning("GraphicSetting File Not Found");
         }
 
@@ -52,6 +56,49 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
         return Resources.Load<GameObject>(path);
     }
 
+    private IEnumerator InitializeCharacterPrefabs()
+    {
+        if (CharacterPrefabDict is not null) yield break;
+
+        // 로딩 시간으로 나누어 로딩.
+        // Tick : 컴퓨터가 한 번 깜빡이는 것을 의미함.
+        // Tick이름을 사용하긴 했지만, 정확히는 ms단위.
+        // 운영체제에서 제공하는 기능을 사용하기 떄문에 완벽히 정확하지는 않음.
+        int lastTime = Environment.TickCount;
+
+        CharacterPrefabDict = new();
+        for (CharacterType i = CharacterType.PlayerCharacterStart + 1;
+            i < CharacterType.PlayerCharacterEnd;
+            i++)
+        {
+            GameObject currentCharacter = Resources.Load<GameObject>($"Characters/{i.ToString()}");
+            if (currentCharacter is not null)
+                CharacterPrefabDict.TryAdd(i, currentCharacter);
+
+            int currentTime = Environment.TickCount;
+            if (lastTime + 200 < currentTime)
+            {
+                lastTime = currentTime;
+                yield return null;
+            }
+        }
+
+        /*
+            Time.time -> float , ms 단위를 재기에는 
+            float은 소수가 있던 없던 앞부터 6~7자리 만큼만 정밀함.
+         */
+
+        /*
+            조금 느린 대신 더 정밀함, StartNew 가비지 컬렉터가 호출될 여지가 있음.   
+
+            나노초 단위 사용법
+            System.Diagnostics.Stopwatch timer = System.Diagnostics.Stopwatch.StartNew();
+
+            // 작업 및 코드 실행
+
+            timer.Stop();
+         */
+    }
 
     // HxD를 통해 저장한 파일을 읽어볼 수 있음.
     public static void SaveFile(string directory, string fileName, params byte[] data)
