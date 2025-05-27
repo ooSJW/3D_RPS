@@ -20,10 +20,10 @@ public enum UIType
 
 public enum CharacterType
 {
-    CharacterBase,
 
     ///
     PlayerCharacterStart = 100,
+    CharacterBase,
     PlayerCharacterEnd = 200,
     ///
     MonsterCharacterStart = 1000,

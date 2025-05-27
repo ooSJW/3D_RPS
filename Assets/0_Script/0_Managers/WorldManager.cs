@@ -8,6 +8,7 @@ public partial class WorldManager : MonoBehaviour, IManagerBase // Data Field
     public bool IsInit { get; set; }
 
     private Dictionary<string, PlayerSpawnArea[]> playerSpawnAreaDict = new();
+    private PoolManager poolManager;
 
     [SerializeField] private CharacterType playerCharacter;
     [SerializeField] private ControllerType playerController;
@@ -18,6 +19,9 @@ public partial class WorldManager : MonoBehaviour, IManagerBase // Initialize
     public IEnumerator Initialize()
     {
         playerSpawnAreaDict.AddComponents(GameObject.FindGameObjectsWithTag("Respawn"));
+        poolManager = gameObject.AddComponent<PoolManager>();
+        yield return poolManager.Initialize();
+
         yield break;
     }
     public void Exit()

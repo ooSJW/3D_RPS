@@ -41,6 +41,8 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Initialize
             Debug.LogWarning("GraphicSetting File Not Found");
         }
 
+        yield return InitializeCharacterPrefabs();
+
         yield break;
     }
     public void Exit()
@@ -71,11 +73,12 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
             i < CharacterType.PlayerCharacterEnd;
             i++)
         {
-            GameObject currentCharacter = Resources.Load<GameObject>($"Characters/{i.ToString()}");
+            GameObject currentCharacter = Resources.Load<GameObject>($"Prefabs/Characters/{i.ToString()}");
             if (currentCharacter is not null)
                 CharacterPrefabDict.TryAdd(i, currentCharacter);
 
             int currentTime = Environment.TickCount;
+
             if (lastTime + 200 < currentTime)
             {
                 lastTime = currentTime;

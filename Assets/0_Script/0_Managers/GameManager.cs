@@ -79,8 +79,13 @@ public partial class GameManager : MonoBehaviour, IManagerBase
         if (SceneManager.sceneCount == 1)
 
 #endif
+
             // 저장해놓은 Task는 Start나 Task.Run을 사용해야함.
             LoadSceneAsync(initializeSceneName);
+
+#if UNITY_EDITOR
+        else yield return InitializeWorldManager();
+#endif
 
         UIManager.ClaimLoadingDone();
 
@@ -177,11 +182,16 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Property
             yield return null;
         }
 
+        yield return InitializeWorldManager();
+
+        UIManager.ClaimLoadingDone();
+    }
+
+    private IEnumerator InitializeWorldManager()
+    {
         WorldManager worldManager = FindFirstObjectByType<WorldManager>();
         if (worldManager is not null)
             yield return worldManager.Initialize();
-
-        UIManager.ClaimLoadingDone();
     }
 }
 
