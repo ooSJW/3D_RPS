@@ -2,41 +2,55 @@ using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
+
+
+[System.Serializable]
+public struct PoolRequestCharacter { public CharacterType wantType; public int amount; }
+
+[System.Serializable]
+public struct PoolRequestController { public ControllerType wantType; public int amount; }
+
+
+public delegate GameObject DelegateSpawn(string name, Vector3 position, Quaternion rotation, Vector3 scale, Transform parent, Space coord);
+public delegate void DelegateDespawn(GameObject target);
 public partial class PoolManager : MonoBehaviour, IManagerBase // Data Field
 {
     public bool IsInit { get; set; }
+    // event Property
+    public static event DelegateSpawn OnSpawn; //{ add => OnSpawn += value; remove => OnSpawn -= value; }
+    public static event DelegateDespawn OnDespawn; //{ add => OnDespawn += value; remove => OnDespawn -= value; }
+
+    [SerializeField] private PoolRequestCharacter[] requestCharacter = new PoolRequestCharacter[0];
+    [SerializeField] private PoolRequestController[] requestController = new PoolRequestController[0];
 
     private Dictionary<string, Queue<GameObject>> poolableObjectDict = new();
 
+    [SerializeField]
     private Transform rootTransform;
-
-    public bool create;
-    // TODO TEST
-    private void Update()
-    {
-        if (create)
-        {
-            SpawnObject("CharacterBase",
-                Random.insideUnitSphere * 5f,
-                Random.rotation,
-                Vector3.one * Random.Range(0.5f, 2f),
-                null,
-                Space.World);
-
-            create = false;
-        }
-    }
 }
 
 public partial class PoolManager : MonoBehaviour, IManagerBase // Initialize
 {
     public IEnumerator Initialize()
     {
+        OnSpawn -= SpawnObject;
+        OnSpawn += SpawnObject;
+        OnDespawn -= Release2Pool;
+        OnDespawn += Release2Pool;
+
         rootTransform = new GameObject("[Root Pool]").transform;
-        RegisterPoolObject(FileManager.CharacterPrefabDict[CharacterType.CharacterBase], 50);
+
+        foreach (var current in requestCharacter)
+        {
+            RegisterPoolObject
+                (
+                FileManager.CharacterPrefabDict[current.wantType],
+                current.amount
+                );
+        }
+
         yield break;
     }
     public void Exit()
@@ -160,8 +174,58 @@ public partial class PoolManager : MonoBehaviour, IManagerBase // Property
         }
         transform.localScale = scale;
 
+        // IPoolable과 MonoBehaviour을 상속받는 클래스를 dictionary값으로 설정 시 
+        // TryGetConponent없이 바로 초기화 가능.
+        if (instance.TryGetComponent(out IPoolable poolComponent))
+            poolComponent.Initialize();
+
         instance.SetActive(true);
 
         return instance;
+    }
+
+    private void Release2Pool(GameObject target)
+    {
+        if (target?.TryGetComponent(out IPoolable poolComponent) ?? false)
+        {
+            Queue<GameObject> rootQueue = poolComponent.RootQueue;
+            if (rootQueue is not null)
+            {
+                target.SetActive(false);
+                rootQueue.Enqueue(target);
+                target.transform.SetParent(GetRoot(target.name));
+                poolComponent.Return2Pool();
+                return;
+            }
+        }
+
+        Destroy(target);
+    }
+
+    public static GameObject ClaimSpawn(string name, Vector3 position, Quaternion rotation, Vector3 scale, Transform parent, Space coord)
+    {
+        return OnSpawn?.Invoke(name, position, rotation, scale, parent, coord);
+    }
+    public static GameObject ClaimSpawn(string name, Transform parent, Vector3 position)
+    {
+        return OnSpawn?.Invoke(name, position, Quaternion.identity, Vector3.one, parent, Space.Self);
+    }
+    public static GameObject ClaimSpawn(string name, Transform parent)
+    {
+        return OnSpawn?.Invoke(name, Vector3.zero, Quaternion.identity, Vector3.one, parent, Space.Self);
+    }
+    public static GameObject ClaimSpawn(string name, Vector3 position)
+    {
+        return OnSpawn?.Invoke(name, position, Quaternion.identity, Vector3.one, null, Space.World);
+    }
+    public static GameObject ClaimSpawn(string name)
+    {
+        return OnSpawn?.Invoke(name, Vector3.zero, Quaternion.identity, Vector3.one, null, Space.World);
+    }
+
+
+    public static void ClaimDeSpawn(GameObject target)
+    {
+        OnDespawn?.Invoke(target);
     }
 }

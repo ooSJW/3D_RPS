@@ -331,5 +331,11 @@ public static class Extensions
         result = target[index];
         return true;
     }
+
+    public static T GetOrAddComponent<T>(this GameObject target) where T : Component
+    {
+        // visualScripting에 있는데 Unity.Engine랑 함수이름이 겹치는 경우가 많아 namespace이슈 때문에 만듦.
+        return target.GetComponent<T>() ?? target.AddComponent<T>();
+    }
 }
 

@@ -19,7 +19,7 @@ public partial class WorldManager : MonoBehaviour, IManagerBase // Initialize
     public IEnumerator Initialize()
     {
         playerSpawnAreaDict.AddComponents(GameObject.FindGameObjectsWithTag("Respawn"));
-        poolManager = gameObject.AddComponent<PoolManager>();
+        poolManager = gameObject.GetOrAddComponent<PoolManager>();
         yield return poolManager.Initialize();
 
         yield break;

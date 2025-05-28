@@ -24,5 +24,8 @@ public partial class CharacterBase // Initialize
 
 public partial class CharacterBase
 {
-
+    private void OnCollisionEnter(Collision collision)
+    {
+        PoolManager.ClaimDeSpawn(gameObject);
+    }
 }
