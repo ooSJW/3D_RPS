@@ -86,7 +86,7 @@ GameObject:
   - component: {fileID: 7116760131398637363}
   - component: {fileID: 297769377906891310}
   - component: {fileID: 1721331872828780535}
-  - component: {fileID: -8492820808079481817}
+  - component: {fileID: 9209264459484778732}
   m_Layer: 5
   m_Name: LoadingScreen
   m_TagString: Untagged
@@ -154,7 +154,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &-8492820808079481817
+--- !u!114 &9209264459484778732
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

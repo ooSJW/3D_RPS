@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7654897074823871069}
   - component: {fileID: 8672968837263916056}
   - component: {fileID: -6182898916104479225}
+  - component: {fileID: -719985365835381371}
   m_Layer: 0
   m_Name: CharacterBase
   m_TagString: Untagged
@@ -149,5 +150,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 72a90f2113466e14f988aa59a4ae5b9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healthCurrent: 0
+  healthMax: 0
+  damageBase: 0
+  criticalRate: 0
+  ciriticalDamage: 0
+  damageReducePercent: 0
+  walkSpeedBase: 0
+  runSpeedBase: 0
+  isRunning: 0
+  isInvincible: 0
+--- !u!114 &-719985365835381371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1128708673257302066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae341edc83f356243ba7bec97b37167e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
