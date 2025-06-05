@@ -32,6 +32,11 @@ public partial class CharacterBase : MonoBehaviour, IPoolable // Delegate Field
 public partial class CharacterBase : MonoBehaviour, IPoolable // Data Field
 {
     public ControllerBase Controller { get; protected set; }
+
+    // ai이거나 직접 배치한 경우 생성된 Controller , 기본적으로 몬스터, 테스트 시 직접 참조할 캐릭터
+    public ControllerType BaseControllerType => baseControllerType;
+    [SerializeField] protected ControllerType baseControllerType;
+    
     public Queue<GameObject> RootQueue { get; set; }
 
     protected Vector3 forward;
@@ -77,10 +82,6 @@ public partial class CharacterBase : MonoBehaviour, IPoolable // Data Field
 
 public partial class CharacterBase // Initialize
 {
-    private void Awake()
-    {
-        Initialize();
-    }
     public void Initialize()
     {
         foreach (CharacterModuleBase currentModule in GetComponents<CharacterModuleBase>())

@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static UnityEngine.Rendering.HDROutputUtils;
+
+public delegate void DelegateUpdate(float deltaTime);
 
 public partial class GameManager : MonoBehaviour, IManagerBase // Data Field
-{
+{ 
+
     private static GameManager instance;
     public static GameManager Instance { get => instance; }
 
@@ -17,6 +19,7 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Data Field
 
     private bool isInit = false;
     public bool IsInit { get => isInit; protected set => isInit = value; }
+
     private IEnumerator initializer;
 
     public Scene CurrentScene { get; private set; }
@@ -30,9 +33,19 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Data Field
     private CameraManager cameraManager;
     private UserInputManager userInputManager;
 
+    // 프레임 시작 시 데이터를 초기화하는 단계
+    public static event DelegateUpdate OnInitialUpdate;
+
+    public static event DelegateUpdate OnControllerUpdate;
+    public static event DelegateUpdate OnCharacterUpdate;
+    public static event DelegateUpdate OnObjectUpdate;
+
+    // 프레임 종료 시 데이터를 정리하는 단계
+    public static event DelegateUpdate OnPostUpdate;
+
 }
 
-public partial class GameManager : MonoBehaviour, IManagerBase
+public partial class GameManager : MonoBehaviour, IManagerBase // Initialize
 {
 
     // GameManager 유니티에 연결 및 씬이 변경되었을 때 사용할 함수 등록
@@ -110,6 +123,7 @@ public partial class GameManager : MonoBehaviour, IManagerBase
 
     }
 }
+
 
 public partial class GameManager : MonoBehaviour, IManagerBase // Property
 {
@@ -197,7 +211,7 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Property
 
 
 
-public partial class GameManager : MonoBehaviour, IManagerBase
+public partial class GameManager : MonoBehaviour, IManagerBase // Main
 {
     // Start만 코루틴으로 사용 가능
     // IEnumerator : 함수를 나눠서 실행하는 형식 / 어디까지 실행했고, 언제까지 기다릴지가 저장된 형식
@@ -208,5 +222,22 @@ public partial class GameManager : MonoBehaviour, IManagerBase
         if (!this.GenericSingleton(ref instance)) Destroy(this);
         else
             yield return initializer = Initialize();
+    }
+
+
+    private void Update() // GameManager의 Update
+    {
+        // 만약 프레임 마다 null체크가 싫을 경우 빈 함수나, 항상 실행해야하는 함수를 하나 추가하는 방법도있음.
+        // 델타타임을 한 번에 관리하고, Time.deltaTime의 호출을 줄이기 위해 매개변수로 deltaTime을 넣음.
+
+        float deltaTime = Time.deltaTime;
+
+        OnInitialUpdate?.Invoke(deltaTime);
+
+        OnControllerUpdate?.Invoke(deltaTime);
+        OnCharacterUpdate?.Invoke(deltaTime);
+        OnObjectUpdate?.Invoke(deltaTime);
+
+        OnPostUpdate?.Invoke(deltaTime);
     }
 }

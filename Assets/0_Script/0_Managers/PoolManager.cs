@@ -46,7 +46,7 @@ public partial class PoolManager : MonoBehaviour, IManagerBase // Initialize
         {
             RegisterPoolObject
                 (
-                FileManager.CharacterPrefabDict[current.wantType],
+                FileManager.GetCharacterPrefab(current.wantType),
                 current.amount
                 );
         }
@@ -159,6 +159,9 @@ public partial class PoolManager : MonoBehaviour, IManagerBase // Property
     public GameObject SpawnObject(string name, Vector3 position, Quaternion rotation, Vector3 scale, Transform parent, Space coord)
     {
         GameObject instance = GetPoolInstance(name);
+
+        if (instance is null) return null;
+
         Transform transform = instance.transform;
         instance.transform.SetParent(parent);
 
@@ -202,25 +205,29 @@ public partial class PoolManager : MonoBehaviour, IManagerBase // Property
         Destroy(target);
     }
 
-    public static GameObject ClaimSpawn(string name, Vector3 position, Quaternion rotation, Vector3 scale, Transform parent, Space coord)
+    public static GameObject ClaimSpawn(string key, Vector3 position, Quaternion rotation, Vector3 scale, Transform parent, Space coord)
     {
-        return OnSpawn?.Invoke(name, position, rotation, scale, parent, coord);
+        return OnSpawn?.Invoke(key, position, rotation, scale, parent, coord);
     }
-    public static GameObject ClaimSpawn(string name, Transform parent, Vector3 position)
+    public static GameObject ClaimSpawn(string key, Transform parent, Vector3 position)
     {
-        return OnSpawn?.Invoke(name, position, Quaternion.identity, Vector3.one, parent, Space.Self);
+        return OnSpawn?.Invoke(key, position, Quaternion.identity, Vector3.one, parent, Space.Self);
     }
-    public static GameObject ClaimSpawn(string name, Transform parent)
+    public static GameObject ClaimSpawn(string key, Transform parent)
     {
-        return OnSpawn?.Invoke(name, Vector3.zero, Quaternion.identity, Vector3.one, parent, Space.Self);
+        return OnSpawn?.Invoke(key, Vector3.zero, Quaternion.identity, Vector3.one, parent, Space.Self);
     }
-    public static GameObject ClaimSpawn(string name, Vector3 position)
+    public static GameObject ClaimSpawn(string key, Vector3 position, Quaternion rotation, Vector3 size)
     {
-        return OnSpawn?.Invoke(name, position, Quaternion.identity, Vector3.one, null, Space.World);
+        return OnSpawn?.Invoke(key, position, rotation, size, null, Space.World);
     }
-    public static GameObject ClaimSpawn(string name)
+    public static GameObject ClaimSpawn(string key, Vector3 position)
     {
-        return OnSpawn?.Invoke(name, Vector3.zero, Quaternion.identity, Vector3.one, null, Space.World);
+        return OnSpawn?.Invoke(key, position, Quaternion.identity, Vector3.one, null, Space.World);
+    }
+    public static GameObject ClaimSpawn(string key)
+    {
+        return OnSpawn?.Invoke(key, Vector3.zero, Quaternion.identity, Vector3.one, null, Space.World);
     }
 
 

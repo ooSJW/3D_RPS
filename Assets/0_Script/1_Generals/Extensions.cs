@@ -301,7 +301,17 @@ public static class Extensions
                     if (target[currentName].Contains(currentComponent))
                         continue;
 
-                    target[currentName].Append(currentComponent);
+                    //List<T> asList = new(target[currentName]);
+                    //asList.Add(currentComponent);
+                    //target[currentName] = asList.ToArray();
+
+                    T[] temp = new T[target[currentName].Length + 1];
+                    Array.Copy(target[currentName], temp, target[currentName].Length);
+                    temp[^1] = currentComponent;
+                    target[currentName] = temp;
+
+                    // Append : String의 함수처럼 결과값을 반환함, 바로 원본 배열에 요소가 추가되는 것이 아님.
+                    // target[currentName].Append(currentComponent);
                 }
                 else
                 {

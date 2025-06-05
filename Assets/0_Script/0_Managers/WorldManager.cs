@@ -3,12 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+public delegate CharacterType DelegateGetPlayerCharacterType();
+public delegate ControllerType DelegateGetPlayerControllerType();
+
+public delegate PlayerSpawnArea DelegateGetRandomSpawnArea(string key);
+public delegate PlayerSpawnArea DelegateGetSpawnAreaByIndex(string key, int index);
+public delegate PlayerSpawnArea[] DelegateGetSpawnAreaAray(string key);
+
 public partial class WorldManager : MonoBehaviour, IManagerBase // Data Field
 {
     public bool IsInit { get; set; }
 
+    protected static DelegateGetPlayerCharacterType ClaimPlayerCharacterType;
+    protected static DelegateGetPlayerControllerType ClaimPlayerControllerType;
+
+    protected static DelegateGetRandomSpawnArea ClaimRandomSpawnArea;
+    protected static DelegateGetSpawnAreaByIndex ClaimSpawnAreaByIndex;
+    protected static DelegateGetSpawnAreaAray ClaimSpawnAreaArray;
+
+
     private Dictionary<string, PlayerSpawnArea[]> playerSpawnAreaDict = new();
     private PoolManager poolManager;
+    private CharacterManager characterManager;
+    private ControllerManager controllerManager;
 
     [SerializeField] private CharacterType playerCharacter;
     [SerializeField] private ControllerType playerController;
@@ -18,21 +35,48 @@ public partial class WorldManager : MonoBehaviour, IManagerBase // Initialize
 {
     public IEnumerator Initialize()
     {
+        ClaimPlayerCharacterType = () => playerCharacter;
+        ClaimPlayerControllerType = () => playerController;
+
+        ClaimRandomSpawnArea -= FindRandomSpawnArea;
+        ClaimRandomSpawnArea += FindRandomSpawnArea;
+
+        ClaimSpawnAreaByIndex -= FindSpawnArea;
+        ClaimSpawnAreaByIndex += FindSpawnArea;
+
+        ClaimSpawnAreaArray -= FindSpawnAreaArray;
+        ClaimSpawnAreaArray += FindSpawnAreaArray;
+
+
+
         playerSpawnAreaDict.AddComponents(GameObject.FindGameObjectsWithTag("Respawn"));
         poolManager = gameObject.GetOrAddComponent<PoolManager>();
         yield return poolManager.Initialize();
 
+        characterManager = gameObject.GetOrAddComponent<CharacterManager>();
+        yield return characterManager.Initialize();
+
+        controllerManager = gameObject.GetOrAddComponent<ControllerManager>();
+        yield return controllerManager.Initialize();
+
+
         yield break;
     }
+
     public void Exit()
     {
+        ClaimPlayerCharacterType = null;
+        ClaimPlayerControllerType = null;
+        ClaimRandomSpawnArea -= FindRandomSpawnArea;
+        ClaimSpawnAreaByIndex -= FindSpawnArea;
+        ClaimSpawnAreaArray -= FindSpawnAreaArray;
 
     }
 }
 
 public partial class WorldManager : MonoBehaviour, IManagerBase // Property
 {
-    public PlayerSpawnArea[] GetSpawnAreaArray(string key)
+    private PlayerSpawnArea[] FindSpawnAreaArray(string key)
     {
         if (playerSpawnAreaDict.TryGetValue(key, out PlayerSpawnArea[] result))
             return result;
@@ -41,7 +85,7 @@ public partial class WorldManager : MonoBehaviour, IManagerBase // Property
     }
 
 
-    public PlayerSpawnArea GetSpawnArea(string key, int index = 0)
+    private PlayerSpawnArea FindSpawnArea(string key, int index = 0)
     {
         if (playerSpawnAreaDict.TryGetValue(key, out PlayerSpawnArea[] array))
         {
@@ -52,10 +96,9 @@ public partial class WorldManager : MonoBehaviour, IManagerBase // Property
     }
 
 
-    public PlayerSpawnArea GetRandomSpawnArea(string key)
+    private PlayerSpawnArea FindRandomSpawnArea(string key)
     {
-        PlayerSpawnArea[] spawnArray = GetSpawnAreaArray(key);
-
+        PlayerSpawnArea[] spawnArray = FindSpawnAreaArray(key);
         if (spawnArray is null || spawnArray.Length == 0)
             return null;
         if (spawnArray.Length == 1)
@@ -63,6 +106,14 @@ public partial class WorldManager : MonoBehaviour, IManagerBase // Property
 
         return spawnArray[Random.Range(0, spawnArray.Length)];
     }
+
+    public static CharacterType GetPlayerCharacterType() => ClaimPlayerCharacterType?.Invoke() ?? CharacterType.CharacterBase;
+    public static ControllerType GetPlayerControllerType() => ClaimPlayerControllerType?.Invoke() ?? ControllerType.ControllerBase;
+
+    public static PlayerSpawnArea GetRandomSpawnArea(string key) => ClaimRandomSpawnArea?.Invoke(key);
+    public static PlayerSpawnArea GetSpawnAreaByIndex(string key, int index) => ClaimSpawnAreaByIndex?.Invoke(key, index);
+    public static PlayerSpawnArea[] GetSpawnAreaArray(string key) => ClaimSpawnAreaArray?.Invoke(key);
+
 }
 
 public partial class WorldManager : MonoBehaviour, IManagerBase // Main

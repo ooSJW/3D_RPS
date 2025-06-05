@@ -11,8 +11,8 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Data Field
 
     public static GraphicOptionValues SavedGraphicOptions { get; protected set; }
 
-    public static Dictionary<CharacterType, GameObject> CharacterPrefabDict { get; protected set; }
-    public static Dictionary<ControllerType, GameObject> ControllerPrefabDict { get; protected set; }
+    private static Dictionary<CharacterType, GameObject> characterPrefabDict;
+    private static Dictionary<ControllerType, GameObject> controllerPrefabDict;
 
     private string mainDirectory;
     private string saveDirectory;
@@ -60,7 +60,7 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
 
     private IEnumerator InitializeCharacterPrefabs()
     {
-        if (CharacterPrefabDict is not null) yield break;
+        if (characterPrefabDict is not null) yield break;
 
         // 로딩 시간으로 나누어 로딩.
         // Tick : 컴퓨터가 한 번 깜빡이는 것을 의미함.
@@ -68,14 +68,14 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
         // 운영체제에서 제공하는 기능을 사용하기 떄문에 완벽히 정확하지는 않음.
         int lastTime = Environment.TickCount;
 
-        CharacterPrefabDict = new();
+        characterPrefabDict = new();
         for (CharacterType i = CharacterType.PlayerCharacterStart + 1;
             i < CharacterType.PlayerCharacterEnd;
             i++)
         {
             GameObject currentCharacter = Resources.Load<GameObject>($"Prefabs/Characters/{i.ToString()}");
             if (currentCharacter is not null)
-                CharacterPrefabDict.TryAdd(i, currentCharacter);
+                characterPrefabDict.TryAdd(i, currentCharacter);
 
             int currentTime = Environment.TickCount;
 
@@ -85,6 +85,12 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
                 yield return null;
             }
         }
+
+        // TODO TEST
+        controllerPrefabDict = new();
+        controllerPrefabDict.TryAdd(ControllerType.ControllerBase, Resources.Load<GameObject>("Prefabs/Controllers/ControllerBase"));
+
+
 
         /*
             Time.time -> float , ms 단위를 재기에는 
@@ -155,4 +161,9 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
 
         return result;
     }
+
+    public static GameObject GetCharacterPrefab(CharacterType wantType)
+        => characterPrefabDict.TryGetValue(wantType, out GameObject result) ? result : null;
+    public static GameObject GetControllerPrefab(ControllerType wantType)
+          => controllerPrefabDict.TryGetValue(wantType, out GameObject result) ? result : null;
 }
