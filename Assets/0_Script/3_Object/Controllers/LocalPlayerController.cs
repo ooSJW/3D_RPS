@@ -5,19 +5,6 @@ using UnityEngine;
 
 public partial class LocalPlayerController : PlayerController // Initialize
 {
-    [SerializeField] private CharacterBase character;
-
-    private void Update()
-    {
-        if (character != ControlCharacterBase)
-        {
-            if (character) Possess(character);
-            else UnPossess();
-        }
-    }
-
-
-
     public override CharacterBase Possess(CharacterBase target)
     {
         base.Possess(target);

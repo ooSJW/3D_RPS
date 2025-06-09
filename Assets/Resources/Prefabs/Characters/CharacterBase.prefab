@@ -152,13 +152,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72a90f2113466e14f988aa59a4ae5b9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  baseControllerType: 0
   healthCurrent: 0
   healthMax: 0
   damageBase: 0
   criticalRate: 0
   ciriticalDamage: 0
   damageReducePercent: 0
-  walkSpeedBase: 0
+  walkSpeedBase: 5
   runSpeedBase: 0
   isRunning: 0
   isInvincible: 0
