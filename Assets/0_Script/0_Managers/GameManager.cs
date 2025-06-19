@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 public delegate void DelegateUpdate(float deltaTime);
 
 public partial class GameManager : MonoBehaviour, IManagerBase // Data Field
-{ 
+{
 
     private static GameManager instance;
     public static GameManager Instance { get => instance; }
@@ -59,7 +59,7 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Initialize
 
         uiManager = gameObject?.AddComponent<UIManager>();
         yield return uiManager?.Initialize();
-        UIManager.ClaimLoadingStart(6);
+        SetLoading(true, 6);
 
         UIManager.ClaimLoadingNext("파일");
         fileManager = gameObject?.AddComponent<FileManager>();
@@ -85,8 +85,6 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Initialize
         userInputManager = gameObject?.AddComponent<UserInputManager>();
         yield return userInputManager?.Initialize();
 
-        UIManager.ClaimLoadingDone();
-
 #if UNITY_EDITOR
         // 정상적인 경로로 시작된 상황
         if (SceneManager.sceneCount == 1)
@@ -100,9 +98,7 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Initialize
         else yield return InitializeWorldManager();
 #endif
 
-        UIManager.ClaimLoadingDone();
-
-        isInit = true;
+        SetLoading(false);
     }
 
     public void Exit()
@@ -175,7 +171,7 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Property
 
     private IEnumerator LoadingProgress(AsyncOperation operation, string loadingContext)
     {
-        UIManager.ClaimLoadingStart(100);
+        SetLoading(true, 100);
 
         while (!operation.isDone)
         {
@@ -183,12 +179,12 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Property
             yield return null;
         }
 
-        UIManager.ClaimLoadingDone();
+        SetLoading(false);
     }
 
     private IEnumerator LoadingScene(string sceneName)
     {
-        UIManager.ClaimLoadingStart(100);
+        SetLoading(true, 100);
         sceneLoadProgress = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
         while (!sceneLoadProgress.isDone)
         {
@@ -198,7 +194,7 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Property
 
         yield return InitializeWorldManager();
 
-        UIManager.ClaimLoadingDone();
+        SetLoading(false);
     }
 
     private IEnumerator InitializeWorldManager()
@@ -206,6 +202,15 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Property
         WorldManager worldManager = FindFirstObjectByType<WorldManager>();
         if (worldManager is not null)
             yield return worldManager.Initialize();
+    }
+
+    public void SetLoading(bool value, int processAmount = 0)
+    {
+        IsInit = !value;
+        if (value)
+            UIManager.ClaimLoadingStart(processAmount);
+        else
+            UIManager.ClaimLoadingDone();
     }
 }
 
@@ -229,6 +234,7 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Main
     {
         // 만약 프레임 마다 null체크가 싫을 경우 빈 함수나, 항상 실행해야하는 함수를 하나 추가하는 방법도있음.
         // 델타타임을 한 번에 관리하고, Time.deltaTime의 호출을 줄이기 위해 매개변수로 deltaTime을 넣음.
+        if (!IsInit) return;
 
         float deltaTime = Time.deltaTime;
 

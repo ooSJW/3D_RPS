@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -36,7 +37,7 @@ public partial class CharacterBase : MonoBehaviour, IPoolable // Data Field
     // ai이거나 직접 배치한 경우 생성된 Controller , 기본적으로 몬스터, 테스트 시 직접 참조할 캐릭터
     public ControllerType BaseControllerType => baseControllerType;
     [SerializeField] protected ControllerType baseControllerType;
-    
+
     public Queue<GameObject> RootQueue { get; set; }
 
     protected Vector3 forward;
@@ -126,4 +127,31 @@ public partial class CharacterBase // Delegate Property
     public void SendDamage(ref int totalDamage, ref float multiplier, ref bool isCritical) => OnSendDamage?.Invoke(ref totalDamage, ref multiplier, ref isCritical);
     public int GetDamage(int damage, Vector3 direction, bool isCritical, GameObject causer) => OnGetDamage?.Invoke(damage, direction, isCritical, causer) ?? 0;
 
+}
+public partial class CharacterBase // Delegate Property
+{
+    public void AddRotation(float yaw, float pitch)
+    {
+
+    }
+
+    public void AddRotation(Quaternion rotation)
+    {
+
+    }
+
+    public void SetRotation(float yaw, float pitch)
+    {
+
+    }
+
+    public void SetRotation(Vector3 wantforward)
+    {
+
+    }
+
+    public void SetRotation(Quaternion rotation)
+    {
+
+    }
 }

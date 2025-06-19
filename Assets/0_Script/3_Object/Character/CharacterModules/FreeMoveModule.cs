@@ -15,7 +15,7 @@ public partial class FreeMoveModule : CharacterModuleBase // override
         Owner.OnMove += OnMove;
     }
 
-    public override void Dettach()
+    public override void Dettach() 
     {
         base.Dettach();
         Owner.OnMove -= OnMove;

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -13,6 +14,8 @@ public partial class LocalPlayerController : PlayerController // Initialize
         {
             UserInputManager.OnMoveInput -= OnMoveInput;
             UserInputManager.OnMoveInput += OnMoveInput;
+            UserInputManager.OnLookInput -= OnLookInput;
+            UserInputManager.OnLookInput += OnLookInput;
         }
 
         return ControlCharacterBase;
@@ -34,9 +37,19 @@ public partial class LocalPlayerController : PlayerController // Initialize
 public partial class LocalPlayerController : PlayerController
 {
     public void OnMoveInput(Vector2 input)
-            =>
-            ControlCharacterBase.Move(
-            (input.y * ControlCharacterBase.Forward)
-            +
-            (input.x * ControlCharacterBase.Right));
+    {
+        Vector3 moveDirection = (input.y * ControlCharacterBase.Forward) + (input.x * ControlCharacterBase.Right);
+
+        ControlCharacterBase.Move(moveDirection);
+    }
+    private void OnLookInput(Vector2 inputValue)
+    {
+        // Roll Pitch Yaw
+        // Roll : °¼¿ô fpsÀÇ qe
+        // Pitch : ²ô´ö²ô´ö
+        // Yaw : µµ¸®µµ¸®
+        // ¸¶¿ì½º ÁÂ¿ì(x) : yaw
+        // ¸¶¿ì½º »óÇÏ(y) : pitch
+        ControlCharacterBase.AddRotation(inputValue.x, inputValue.y);
+    }
 }
