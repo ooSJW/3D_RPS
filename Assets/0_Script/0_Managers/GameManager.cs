@@ -17,6 +17,7 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Data Field
     // private const string initializeSceneName = "ZTESTScene";
     [SerializeField] private string initializeSceneName;
 
+    private bool isMouseLock = false;
     private bool isInit = false;
     public bool IsInit { get => isInit; protected set => isInit = value; }
 
@@ -211,6 +212,30 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Property
             UIManager.ClaimLoadingStart(processAmount);
         else
             UIManager.ClaimLoadingDone();
+    }
+
+
+    public static bool GetMouseLock() => instance?.isMouseLock ?? !Cursor.visible;
+
+
+    public static void SetMouseLock(bool value)
+    {
+        if (Instance)
+            instance.isMouseLock = value;
+
+        Cursor.visible = !value;
+        if (value)
+        {
+            // Cursor.SetCursor() : 마우스 커서 이미지를 바꾸는 함수
+            // CursorLockMode
+            // None : 안 잠금, Locked : 잠금 ( 화면 중앙에 마우스 고정, mousePosition은 중앙에 고정, mouseDelta 유효 )
+            // Confined : 잠김 ( 화면에 가둠 )
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
     }
 }
 

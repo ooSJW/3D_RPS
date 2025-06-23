@@ -347,5 +347,111 @@ public static class Extensions
         // visualScripting에 있는데 Unity.Engine랑 함수이름이 겹치는 경우가 많아 namespace이슈 때문에 만듦.
         return target.GetComponent<T>() ?? target.AddComponent<T>();
     }
-}
 
+
+    public static float ClampAngle(this float target, float min, float max)
+    {
+        if (MathF.Abs(target) > 360.0f) target %= 360.0f;
+
+        if (MathF.Abs(target) > 180.0f) target -= 360.0f * Mathf.Sign(target);
+
+        return Mathf.Clamp(target, min, max);
+    }
+
+
+    // pitch ( x축 회전 )제한을 두며 더하기
+    public static Quaternion Add(this Quaternion target, Quaternion value, float minPitch = -89.9f, float maxPitch = 89.9f)
+    {
+        Vector3 euler = target.eulerAngles + value.eulerAngles;
+        euler.x = euler.x.ClampAngle(minPitch, maxPitch);
+        return Quaternion.Euler(euler);
+    }
+
+
+    public static Vector3 RotationHorizontal(this Vector3 target, float angle)
+    {
+        // angle, degree ( 360 ) => radian 2 pi
+        float theta = angle * Mathf.Deg2Rad;
+        float cosTheta = Mathf.Cos(theta);
+        float sinTheta = Mathf.Sin(theta);
+
+        return new Vector3
+            (
+            target.x * cosTheta - target.z * sinTheta,
+            target.y,
+            target.x * sinTheta + target.z * cosTheta
+            );
+    }
+
+    public static Vector3 RotationVertical(this Vector3 target, float angle)
+    {
+        float theta = angle * Mathf.Deg2Rad;
+        float cosTheta = Mathf.Cos(theta);
+        float sinTheta = Mathf.Sin(theta);
+        // vector x,z의 길이
+        float hr = Mathf.Sqrt(target.x * target.x + target.z * target.z);
+
+        float hrAfter = hr * cosTheta - target.y * sinTheta;
+        float radiusRatio = hrAfter / hr;
+
+        return new Vector3
+            (
+            target.x * radiusRatio,
+            hr * sinTheta + target.y * cosTheta,
+            target.z * radiusRatio
+            );
+    }
+
+    public static void Degree2RadianCosSin(this float target, out float cos, out float sin)
+    {
+        float theta = target * Mathf.Deg2Rad;
+        cos = Mathf.Cos(theta);
+        sin = Mathf.Sin(theta);
+    }
+
+
+    public static float GetHorizontalAngle(this Vector3 target)
+    {
+        // Atan : 대상의 각도를 가져오는 함수.
+        float atan = Mathf.Atan2(target.z, target.x);
+
+        // Atan 반환 값은 Radian
+        return atan * Mathf.Rad2Deg;
+    }
+
+
+    public static float GetVerticalAngle(this Vector3 target)
+    {
+        float atan = Mathf.Atan2(target.y, Mathf.Sqrt(target.x * target.x + target.z * target.z));
+        return atan * Mathf.Rad2Deg;
+    }
+
+    public static Vector3 RotationVerticalClamped(this Vector3 target, float hor, float ver, float min, float max)
+    {
+        float wanted = ver + target.GetVerticalAngle();
+        float clamped = Mathf.Clamp(wanted, min, max);
+        return Rotation(target, hor, ver + (clamped - wanted));
+    }
+
+    public static Vector3 Rotation(this Vector3 target, float hor, float ver)
+    {
+        hor.Degree2RadianCosSin(out float horCosTheta, out float horSinTheta);
+        ver.Degree2RadianCosSin(out float verCosTheta, out float verSinTheta);
+
+        Vector3 result = new Vector3
+            (
+            target.x * horCosTheta - target.z * horSinTheta,
+            0,
+            target.x * horSinTheta + target.z * horCosTheta
+            );
+
+        float hr = result.magnitude;
+        float hrAfter = hr * verCosTheta - target.y * verSinTheta;
+        float radiusRatio = hr != 0 ? hrAfter / hr : 1.0f;
+
+        result *= radiusRatio;
+        result.y = hr * verSinTheta + target.y * verCosTheta;
+
+        return result;
+    }
+}

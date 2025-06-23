@@ -16,6 +16,7 @@ public partial class LocalPlayerController : PlayerController // Initialize
             UserInputManager.OnMoveInput += OnMoveInput;
             UserInputManager.OnLookInput -= OnLookInput;
             UserInputManager.OnLookInput += OnLookInput;
+            UserInputManager.OnMenuInput += () => GameManager.SetMouseLock(!GameManager.GetMouseLock());
         }
 
         return ControlCharacterBase;
@@ -44,12 +45,15 @@ public partial class LocalPlayerController : PlayerController
     }
     private void OnLookInput(Vector2 inputValue)
     {
-        // Roll Pitch Yaw
+        // 회전 : Roll Pitch Yaw
         // Roll : 갸웃 fps의 qe
         // Pitch : 끄덕끄덕
         // Yaw : 도리도리
         // 마우스 좌우(x) : yaw
         // 마우스 상하(y) : pitch
-        ControlCharacterBase.AddRotation(inputValue.x, inputValue.y);
+        // -는 움직이는 주체에 따라 -하거나 그대로 전달.
+        // * 감도
+        inputValue *= 0.5f;
+        ControlCharacterBase.AddRotation(-inputValue.x, inputValue.y);
     }
 }

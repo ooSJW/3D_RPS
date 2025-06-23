@@ -132,26 +132,27 @@ public partial class CharacterBase // Delegate Property
 {
     public void AddRotation(float yaw, float pitch)
     {
+        //Forward = Forward.RotationHorizontal(yaw);
+        //Forward = Forward.RotationVertical(pitch);
+        Forward = Forward.RotationVerticalClamped(yaw, pitch, -89.9f, 89.9f);
 
+        //AddRotation(Quaternion.Euler(pitch, yaw, 0));
     }
-
     public void AddRotation(Quaternion rotation)
     {
+        //Quaternion currentRotation = Quaternion.LookRotation(Forward);
+        //// Quaternion sum = rotation * currentRotation; // 두 쿼터니온 회전을 하나로 합칠 때에는 곱해야함.
+        //Vector3 euler = currentRotation.eulerAngles + rotation.eulerAngles;
+        //euler.x = euler.x.ClampAngle(-89.9f, 89.9f);
+        //rotation = Quaternion.Euler(euler);
 
+        SetRotation(Quaternion.LookRotation(Forward).Add(rotation));
     }
 
-    public void SetRotation(float yaw, float pitch)
-    {
 
-    }
+    public void SetRotation(float yaw, float pitch) => SetRotation(Quaternion.Euler(pitch, yaw, 0));
 
-    public void SetRotation(Vector3 wantforward)
-    {
+    public void SetRotation(Vector3 wantforward) => Forward = wantforward;
 
-    }
-
-    public void SetRotation(Quaternion rotation)
-    {
-
-    }
+    public void SetRotation(Quaternion rotation) => Forward = rotation * Vector3.forward;
 }
