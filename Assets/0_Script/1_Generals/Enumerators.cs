@@ -24,6 +24,7 @@ public enum CharacterType
     ///
     PlayerCharacterStart = 100,
     CharacterBase,
+    MaleBase,
     PlayerCharacterEnd = 200,
     ///
     MonsterCharacterStart = 1000,
@@ -34,5 +35,7 @@ public enum CharacterType
 
 public enum ControllerType
 {
-    ControllerBase,
+    LocalPlayerController,
+    AIController,
+    ControllerEnd,
 }

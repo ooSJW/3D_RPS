@@ -42,6 +42,7 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Initialize
         }
 
         yield return InitializeCharacterPrefabs();
+        yield return InitializeControllerPrefabs();
 
         yield break;
     }
@@ -61,37 +62,19 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
     private IEnumerator InitializeCharacterPrefabs()
     {
         if (characterPrefabDict is not null) yield break;
+        characterPrefabDict = new();
 
         // 로딩 시간으로 나누어 로딩.
         // Tick : 컴퓨터가 한 번 깜빡이는 것을 의미함.
         // Tick이름을 사용하긴 했지만, 정확히는 ms단위.
         // 운영체제에서 제공하는 기능을 사용하기 떄문에 완벽히 정확하지는 않음.
-        int lastTime = Environment.TickCount;
-
-        characterPrefabDict = new();
-        for (CharacterType i = CharacterType.PlayerCharacterStart + 1;
-            i < CharacterType.PlayerCharacterEnd;
-            i++)
-        {
-            GameObject currentCharacter = Resources.Load<GameObject>($"Prefabs/Characters/{i.ToString()}");
-            if (currentCharacter is not null)
-                characterPrefabDict.TryAdd(i, currentCharacter);
-
-            int currentTime = Environment.TickCount;
-
-            if (lastTime + 200 < currentTime)
-            {
-                lastTime = currentTime;
-                yield return null;
-            }
-        }
-
-        // TODO TEST
-        controllerPrefabDict = new();
-        controllerPrefabDict.TryAdd(ControllerType.ControllerBase, Resources.Load<GameObject>("Prefabs/Controllers/ControllerBase"));
-
-
-
+        yield return InitializePrefabs
+            (
+                characterPrefabDict, "Prefabs/Characters",
+                (int)CharacterType.PlayerCharacterStart + 1,
+                (int)CharacterType.PlayerCharacterEnd,
+                (index) => Enum.IsDefined(typeof(CharacterType), index) ? (CharacterType)index : null
+            );
         /*
             Time.time -> float , ms 단위를 재기에는 
             float은 소수가 있던 없던 앞부터 6~7자리 만큼만 정밀함.
@@ -108,6 +91,50 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
             timer.Stop();
          */
     }
+
+    private IEnumerator InitializeControllerPrefabs()
+    {
+        if (controllerPrefabDict is not null) yield break;
+
+        controllerPrefabDict = new();
+        yield return InitializePrefabs
+      (
+          controllerPrefabDict, "Prefabs/Controllers",
+          (int)ControllerType.LocalPlayerController,
+          (int)ControllerType.ControllerEnd,
+          (index) => Enum.IsDefined(typeof(ControllerType), index) ? (ControllerType)index : null
+      );
+    }
+
+
+    //                                                                                                 where T : struct, Enum : 값 타입 자료만 받을 수 있음
+    public IEnumerator InitializePrefabs<T>(Dictionary<T, GameObject> prefabDict, string directory, int startIndex, int lastIndex, Func<int, T?> Converter) where T : struct, Enum
+    {
+        // 로딩 시간으로 나누어 로딩.
+        // Tick : 컴퓨터가 한 번 깜빡이는 것을 의미함.
+        // Tick이름을 사용하긴 했지만, 정확히는 ms단위.
+        // 운영체제에서 제공하는 기능을 사용하기 떄문에 완벽히 정확하지는 않음.
+        int lastTime = Environment.TickCount;
+
+        for (int i = startIndex; i < lastIndex; i++)
+        {
+            T? current = Converter(i);
+            if (current is null) continue;
+
+            GameObject currentPrefab = Resources.Load<GameObject>($"{directory}/{current}");
+            if (currentPrefab is not null)
+                prefabDict.TryAdd(current.Value, currentPrefab);
+        }
+
+        int currentTime = Environment.TickCount;
+
+        if (lastTime + 200 < currentTime)
+        {
+            lastTime = currentTime;
+            yield return null;
+        }
+    }
+
 
     // HxD를 통해 저장한 파일을 읽어볼 수 있음.
     public static void SaveFile(string directory, string fileName, params byte[] data)

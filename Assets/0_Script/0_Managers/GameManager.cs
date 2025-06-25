@@ -44,6 +44,9 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Data Field
     // 프레임 종료 시 데이터를 정리하는 단계
     public static event DelegateUpdate OnPostUpdate;
 
+    // 매 FixedUpdate마다 물리적 업데이트를 해주는 단계
+    public static event DelegateUpdate OnPhysicsUpdate;
+
 }
 
 public partial class GameManager : MonoBehaviour, IManagerBase // Initialize
@@ -270,5 +273,12 @@ public partial class GameManager : MonoBehaviour, IManagerBase // Main
         OnObjectUpdate?.Invoke(deltaTime);
 
         OnPostUpdate?.Invoke(deltaTime);
+    }
+    private void FixedUpdate()
+    {
+        if (!IsInit) return;
+
+        float deltaTime = Time.fixedDeltaTime;
+        OnPhysicsUpdate?.Invoke(deltaTime);
     }
 }

@@ -108,7 +108,7 @@ public partial class WorldManager : MonoBehaviour, IManagerBase // Property
     }
 
     public static CharacterType GetPlayerCharacterType() => ClaimPlayerCharacterType?.Invoke() ?? CharacterType.CharacterBase;
-    public static ControllerType GetPlayerControllerType() => ClaimPlayerControllerType?.Invoke() ?? ControllerType.ControllerBase;
+    public static ControllerType GetPlayerControllerType() => ClaimPlayerControllerType?.Invoke() ?? ControllerType.LocalPlayerController;
 
     public static PlayerSpawnArea GetRandomSpawnArea(string key) => ClaimRandomSpawnArea?.Invoke(key);
     public static PlayerSpawnArea GetSpawnAreaByIndex(string key, int index) => ClaimSpawnAreaByIndex?.Invoke(key, index);

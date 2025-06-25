@@ -426,7 +426,7 @@ public static class Extensions
         return atan * Mathf.Rad2Deg;
     }
 
-    public static Vector3 RotationVerticalClamped(this Vector3 target, float hor, float ver, float min, float max)
+    public static Vector3 RotationVerticalClamped(this Vector3 target, float hor, float ver, float min = -89.9f, float max = 89.9f)
     {
         float wanted = ver + target.GetVerticalAngle();
         float clamped = Mathf.Clamp(wanted, min, max);
@@ -453,5 +453,19 @@ public static class Extensions
         result.y = hr * verSinTheta + target.y * verCosTheta;
 
         return result;
+    }
+
+
+    // magnitude보다 sqrMagnitude가 성능적으로 유리함.
+    // 예시로 vector가 0인지 확인할 때 sqr사용.
+    public static float HorizontalSquarMagitude(this Vector3 target)
+        => target.x * target.x + target.z * target.z;
+
+    public static float HorizontalMagitude(this Vector3 target) => Mathf.Sqrt(target.HorizontalSquarMagitude());
+
+    public static Vector3 HorizontalNormalize(this Vector3 target)
+    {
+        target.y = 0; target.Normalize();
+        return target;
     }
 }

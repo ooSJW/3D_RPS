@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public delegate void DelegateCharacterMove(Vector3 direction);
+public delegate void DelegateCharacterMove(CharacterBase mover, Vector3 velocity, float deltaTime);
 public delegate void DelegateCharacterAim(Vector3 direction);
 public delegate void DelegateCharacterAttack(Vector3 direction, bool value);
 public delegate void DelegateCharacterJump();
@@ -14,8 +14,7 @@ public delegate void DelegateCharacterInteraction(GameObject target);
 public delegate int DelegateCharacterGetDamage(int damage, Vector3 direction, bool isCritical, GameObject causer);
 public delegate void DelegateCharacterSendDamage(ref int totalDamage, ref float multiplier, ref bool isCritical);
 
-
-public partial class CharacterBase : MonoBehaviour, IPoolable // Delegate Field
+public partial class CharacterBase : MonoBehaviour, IPoolable, ISocketContainer // Delegate Field
 {
     public event DelegateCharacterMove OnMove;
     public event DelegateCharacterAim OnAim;
@@ -28,9 +27,16 @@ public partial class CharacterBase : MonoBehaviour, IPoolable // Delegate Field
     public event DelegateCharacterGetDamage OnGetDamage;
     public event DelegateCharacterSendDamage OnSendDamage;
 
+    public event DelegateGetSockets OnGetSockets;
+    public event DelegateGetSocketsByType OnGetSocketsByType;
+    public event DelegateGetSocketsByPredicate OnGetSocketsByPredicate;
+
+    public event DelegateGetSocket OnGetSocket;
+    public event DelegateGetSocketByType OnGetSocketByType;
+    public event DelegateGetSocketByPredicate OnGetSocketByPredicate;
 }
 
-public partial class CharacterBase : MonoBehaviour, IPoolable // Data Field
+public partial class CharacterBase// Data Field
 {
     public ControllerBase Controller { get; protected set; }
 
@@ -40,8 +46,10 @@ public partial class CharacterBase : MonoBehaviour, IPoolable // Data Field
 
     public Queue<GameObject> RootQueue { get; set; }
 
-    protected Vector3 forward;
-    protected Vector3 right;
+    public Vector3 MoveDirection { get; protected set; }
+
+    protected Vector3 forward = Vector3.forward;
+    protected Vector3 right = Vector3.right;
     public Vector3 Forward
     {
         get => forward;
@@ -85,18 +93,27 @@ public partial class CharacterBase // Initialize
 {
     public void Initialize()
     {
+        AddSocket(GetComponentsInChildren<SocketBase>());
+        SocketBase[] test = GetSockets();
+        if (test is not null)
+            foreach (var current in test)
+            {
+                Debug.Log($"{current.gameObject.name} / {current.GetType()}");
+            }
+
         foreach (CharacterModuleBase currentModule in GetComponents<CharacterModuleBase>())
         {
             currentModule.Attach(this);
         }
 
-        //TODO TEST
-        Forward = transform.forward;
+
+        GameManager.OnPhysicsUpdate -= UpdateMove;
+        GameManager.OnPhysicsUpdate += UpdateMove;
     }
 
     public void Return2Pool()
     {
-
+        GameManager.OnPhysicsUpdate -= UpdateMove;
     }
 }
 
@@ -116,27 +133,139 @@ public partial class CharacterBase
 
 public partial class CharacterBase // Delegate Property
 {
-    public void Move(Vector3 direction) => OnMove?.Invoke(direction);
+    public void UpdateMove(float deltaTime)
+    {
+        // Epsilon : 0의 근사값
+        if (MoveDirection.sqrMagnitude > float.Epsilon)
+            OnMove?.Invoke(this, MoveDirection * (isRunning ? runSpeedBase : walkSpeedBase), deltaTime);
+    }
+    public void Move(Vector3 direction) => MoveDirection = direction.HorizontalNormalize();
     public void Aim(Vector3 direction) => OnAim?.Invoke(direction);
     public void Attack(Vector3 direction, bool value) => OnAttack?.Invoke(direction, value);
     public void Jump() => OnJump?.Invoke();
     public void Run(bool value) => OnRun?.Invoke(value);
     public void Die() => OnDie?.Invoke();
-    public void Interaction(GameObject target) => OnInteraction?.Invoke(target);
+    public void Interaction(GameObject target)
+        => OnInteraction?.Invoke(target);
 
-    public void SendDamage(ref int totalDamage, ref float multiplier, ref bool isCritical) => OnSendDamage?.Invoke(ref totalDamage, ref multiplier, ref isCritical);
-    public int GetDamage(int damage, Vector3 direction, bool isCritical, GameObject causer) => OnGetDamage?.Invoke(damage, direction, isCritical, causer) ?? 0;
+    public void SendDamage(ref int totalDamage, ref float multiplier, ref bool isCritical)
+        => OnSendDamage?.Invoke(ref totalDamage, ref multiplier, ref isCritical);
+
+    public int GetDamage(int damage, Vector3 direction, bool isCritical, GameObject causer)
+        => OnGetDamage?.Invoke(damage, direction, isCritical, causer) ?? 0;
+
+    public SocketBase GetSocket()
+    {
+        SocketBase result = null;
+        OnGetSocket?.Invoke(ref result);
+        return result;
+    }
+
+    public SocketBase GetSocket(SocketType wantType)
+    {
+        SocketBase result = null;
+        OnGetSocketByType?.Invoke(ref result, wantType);
+        return result;
+    }
+
+    public SocketBase GetSocket(Func<SocketBase, bool> predicate)
+    {
+        SocketBase result = null;
+        OnGetSocketByPredicate?.Invoke(ref result, predicate);
+        return result;
+    }
+
+    public void GetSockets(List<SocketBase> result)
+        => OnGetSockets?.Invoke(result);
+
+
+    public void GetSockets(List<SocketBase> result, SocketType wantType)
+        => OnGetSocketsByType?.Invoke(result, wantType);
+
+
+    public void GetSockets(List<SocketBase> result, Func<SocketBase, bool> predicate)
+        => OnGetSocketsByPredicate?.Invoke(result, predicate);
+
+
+    public SocketBase[] GetSockets()
+    {
+        if (OnGetSockets is null) return null;
+        List<SocketBase> result = new();
+        OnGetSockets?.Invoke(result);
+        return result.ToArray();
+    }
+
+    public SocketBase[] GetSockets(SocketType wantType)
+    {
+        if (OnGetSockets is null) return null;
+        List<SocketBase> result = new();
+        OnGetSocketsByType?.Invoke(result, wantType);
+        return result.ToArray();
+    }
+    public SocketBase[] GetSockets(Func<SocketBase, bool> predicate)
+    {
+        if (OnGetSockets is null) return null;
+        List<SocketBase> result = new();
+        OnGetSocketsByPredicate?.Invoke(result, predicate);
+        return result.ToArray();
+    }
+
+    public void AddSocket(SocketBase target)
+    {
+        if (target is null) return;
+
+        OnGetSockets -= target.GetSockets;
+        OnGetSocketsByType -= target.GetSockets;
+        OnGetSocketsByPredicate -= target.GetSockets;
+
+        OnGetSockets += target.GetSockets;
+        OnGetSocketsByType += target.GetSockets;
+        OnGetSocketsByPredicate += target.GetSockets;
+
+        OnGetSocket -= target.GetSocket;
+        OnGetSocketByType -= target.GetSocket;
+        OnGetSocketByPredicate -= target.GetSocket;
+
+        OnGetSocket += target.GetSocket;
+        OnGetSocketByType += target.GetSocket;
+        OnGetSocketByPredicate += target.GetSocket;
+    }
+
+    public void AddSocket(params SocketBase[] target)
+    {
+        foreach (SocketBase current in target) AddSocket(current);
+    }
+
+    public void RemoveSocket(SocketBase target)
+    {
+        if (target is null) return;
+
+        OnGetSockets -= target.GetSockets;
+        OnGetSocketsByType -= target.GetSockets;
+        OnGetSocketsByPredicate -= target.GetSockets;
+    }
+
+
+    public void RemoveSocket(Func<SocketBase, bool> predicate)
+    {
+        foreach (SocketBase current in GetSockets(predicate))
+            RemoveSocket(current);
+    }
 
 }
-public partial class CharacterBase // Delegate Property
+public partial class CharacterBase // Property
 {
     public void AddRotation(float yaw, float pitch)
     {
         //Forward = Forward.RotationHorizontal(yaw);
         //Forward = Forward.RotationVertical(pitch);
-        Forward = Forward.RotationVerticalClamped(yaw, pitch, -89.9f, 89.9f);
-
+        Forward = Forward.RotationVerticalClamped(yaw, pitch);
+        MoveDirection = MoveDirection.RotationHorizontal(yaw);
         //AddRotation(Quaternion.Euler(pitch, yaw, 0));
+    }
+    public void AddRotationWithoutChangeDirection(float yaw, float pitch)
+    {
+        Forward = Forward.RotationVerticalClamped(yaw, pitch);
     }
     public void AddRotation(Quaternion rotation)
     {

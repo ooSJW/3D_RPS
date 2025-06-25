@@ -27,6 +27,14 @@ public partial class CharacterManager // Initialize
     {
         GameManager.OnInitialUpdate -= OnInitialUpdate;
         GameManager.OnInitialUpdate += OnInitialUpdate;
+
+        foreach (CharacterBase currentCharacter in FindObjectsByType<CharacterBase>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        {
+            currentCharacter.Initialize();
+            WaitForController(currentCharacter);
+        }
+
+
         AddPlayerCharacter(CreateCharacter(WorldManager.GetPlayerCharacterType(), "PlayerSpawnArea"));
 
         yield return null;
@@ -52,19 +60,24 @@ public partial class CharacterManager // Property
 
     public static CharacterBase CreateCharacter(CharacterType wantType, Vector3 wantPosition, Quaternion wantRotation, Vector3 wantSize)
     {
-        GameObject instance = PoolManager.ClaimSpawn(wantType.ToString(), wantPosition, wantRotation, wantSize);
+        Quaternion resultRotation = Quaternion.Euler(0, wantRotation.eulerAngles.y, 0);
+        bool isNotInit = false;
+
+        GameObject instance = PoolManager.ClaimSpawn(wantType.ToString(), wantPosition, resultRotation, wantSize);
         if (instance is null)
         {
             GameObject prefab = FileManager.GetCharacterPrefab(wantType);
             if (prefab is null) return null;
 
-            instance = Instantiate(prefab, wantPosition, wantRotation);
+            instance = Instantiate(prefab, wantPosition, resultRotation);
             instance.transform.localScale = wantSize;
+            isNotInit = true;
         }
 
         if (instance.TryGetComponent(out CharacterBase asCharacter))
         {
-            asCharacter.Initialize();
+            if (isNotInit) asCharacter.Initialize();
+            asCharacter.SetRotation(wantRotation);
             return asCharacter;
         }
 

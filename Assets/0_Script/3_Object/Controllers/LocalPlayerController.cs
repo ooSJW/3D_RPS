@@ -39,6 +39,8 @@ public partial class LocalPlayerController : PlayerController
 {
     public void OnMoveInput(Vector2 input)
     {
+        //Vector3 moveDirection = (input.y * Vector3.forward) + (input.x * Vector3.right);
+
         Vector3 moveDirection = (input.y * ControlCharacterBase.Forward) + (input.x * ControlCharacterBase.Right);
 
         ControlCharacterBase.Move(moveDirection);
