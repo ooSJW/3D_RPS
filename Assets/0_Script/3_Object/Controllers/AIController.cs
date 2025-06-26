@@ -34,7 +34,9 @@ public partial class AIController : ControllerBase // Property
         if (player is not null)
         {
             Vector3 direction = player.transform.position - ControlCharacterBase.transform.position;
-            ControlCharacterBase.Move(direction);
+
+            //ControlCharacterBase.Move(direction);
+            ControlCharacterBase.SetRotation(direction);
         }
     }
 }

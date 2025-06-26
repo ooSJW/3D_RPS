@@ -11,7 +11,7 @@ public delegate void DelegateGetSocketByType(ref SocketBase result, SocketType w
 public delegate void DelegateGetSocketByPredicate(ref SocketBase result, Func<SocketBase, bool> predicate);
 
 public delegate void DelegateSocketAction(Action<SocketBase> wantAction);
-public delegate void DelegateSocketActionByType(Action<SocketType> wantType, Action<SocketBase> wantAction);
+public delegate void DelegateSocketActionByType(SocketType wantType, Action<SocketBase> wantAction);
 public delegate void DelegateSocketActionByPredicate(Func<SocketBase, bool> predicate, Action<SocketBase> wantAction);
 
 public partial interface ISocketContainer
@@ -29,4 +29,8 @@ public partial interface ISocketContainer
 
     public void RemoveSocket(SocketBase target);
     public void RemoveSocket(Func<SocketBase, bool> predicate);
+
+    public void SocketAction(Action<SocketBase> wantAction);
+    public void SocketActionByType(SocketType wantType, Action<SocketBase> wantAction);
+    public void SocketActionByPredicate(Func<SocketBase, bool> predicate, Action<SocketBase> wantAction);
 }

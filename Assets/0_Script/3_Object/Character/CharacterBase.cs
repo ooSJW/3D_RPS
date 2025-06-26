@@ -10,6 +10,7 @@ public delegate void DelegateCharacterJump();
 public delegate void DelegateCharacterRun(bool value);
 public delegate void DelegateCharacterDie();
 public delegate void DelegateCharacterInteraction(GameObject target);
+public delegate void DelegateCharacterOwnerChanged(ControllerBase newController);
 
 public delegate int DelegateCharacterGetDamage(int damage, Vector3 direction, bool isCritical, GameObject causer);
 public delegate void DelegateCharacterSendDamage(ref int totalDamage, ref float multiplier, ref bool isCritical);
@@ -34,6 +35,12 @@ public partial class CharacterBase : MonoBehaviour, IPoolable, ISocketContainer 
     public event DelegateGetSocket OnGetSocket;
     public event DelegateGetSocketByType OnGetSocketByType;
     public event DelegateGetSocketByPredicate OnGetSocketByPredicate;
+
+    public event DelegateCharacterOwnerChanged OnOwnerChanged;
+
+    event DelegateSocketAction OnSocketAction;
+    event DelegateSocketActionByType OnSocketActionByType;
+    event DelegateSocketActionByPredicate OnSocketActionByPredicate;
 }
 
 public partial class CharacterBase// Data Field
@@ -55,6 +62,7 @@ public partial class CharacterBase// Data Field
         get => forward;
         protected set
         {
+            OnAim?.Invoke(value);
             forward = value;
             right.x = forward.z;
             right.y = forward.y;
@@ -94,6 +102,7 @@ public partial class CharacterBase // Initialize
     public void Initialize()
     {
         AddSocket(GetComponentsInChildren<SocketBase>());
+
         SocketBase[] test = GetSockets();
         if (test is not null)
             foreach (var current in test)
@@ -101,7 +110,7 @@ public partial class CharacterBase // Initialize
                 Debug.Log($"{current.gameObject.name} / {current.GetType()}");
             }
 
-        foreach (CharacterModuleBase currentModule in GetComponents<CharacterModuleBase>())
+        foreach (CharacterModuleBase currentModule in GetComponentsInChildren<CharacterModuleBase>())
         {
             currentModule.Attach(this);
         }
@@ -122,11 +131,13 @@ public partial class CharacterBase
     public virtual void PossessedBy(ControllerBase newController)
     {
         Controller = newController;
+        OnOwnerChanged?.Invoke(Controller);
     }
 
     public virtual void UnPossessed()
     {
         Controller = null;
+        OnOwnerChanged?.Invoke(Controller);
     }
 }
 
@@ -217,18 +228,26 @@ public partial class CharacterBase // Delegate Property
         OnGetSockets -= target.GetSockets;
         OnGetSocketsByType -= target.GetSockets;
         OnGetSocketsByPredicate -= target.GetSockets;
-
         OnGetSockets += target.GetSockets;
         OnGetSocketsByType += target.GetSockets;
         OnGetSocketsByPredicate += target.GetSockets;
 
+
         OnGetSocket -= target.GetSocket;
         OnGetSocketByType -= target.GetSocket;
         OnGetSocketByPredicate -= target.GetSocket;
-
         OnGetSocket += target.GetSocket;
         OnGetSocketByType += target.GetSocket;
         OnGetSocketByPredicate += target.GetSocket;
+
+
+        OnSocketAction -= target.SocketAction;
+        OnSocketActionByType -= target.SocketActionByType;
+        OnSocketActionByPredicate -= target.SocketActionByPredicate;
+        OnSocketAction += target.SocketAction;
+        OnSocketActionByType += target.SocketActionByType;
+        OnSocketActionByPredicate += target.SocketActionByPredicate;
+
     }
 
     public void AddSocket(params SocketBase[] target)
@@ -243,6 +262,14 @@ public partial class CharacterBase // Delegate Property
         OnGetSockets -= target.GetSockets;
         OnGetSocketsByType -= target.GetSockets;
         OnGetSocketsByPredicate -= target.GetSockets;
+
+        OnGetSocket -= target.GetSocket;
+        OnGetSocketByType -= target.GetSocket;
+        OnGetSocketByPredicate -= target.GetSocket;
+
+        OnSocketAction -= target.SocketAction;
+        OnSocketActionByType -= target.SocketActionByType;
+        OnSocketActionByPredicate -= target.SocketActionByPredicate;
     }
 
 
@@ -252,6 +279,14 @@ public partial class CharacterBase // Delegate Property
             RemoveSocket(current);
     }
 
+
+    public void SocketAction(Action<SocketBase> wantAction)
+        => OnSocketAction?.Invoke(wantAction);
+    public void SocketActionByType(SocketType wantType, Action<SocketBase> wantAction)
+        => OnSocketActionByType?.Invoke(wantType, wantAction);
+
+    public void SocketActionByPredicate(Func<SocketBase, bool> predicate, Action<SocketBase> wantAction)
+        => OnSocketActionByPredicate?.Invoke(predicate, wantAction);
 }
 public partial class CharacterBase // Property
 {

@@ -348,7 +348,6 @@ public static class Extensions
         return target.GetComponent<T>() ?? target.AddComponent<T>();
     }
 
-
     public static float ClampAngle(this float target, float min, float max)
     {
         if (MathF.Abs(target) > 360.0f) target %= 360.0f;

@@ -25,13 +25,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8895582893718937676}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.043619405, y: 0, z: 0, w: 0.9990483}
-  m_LocalPosition: {x: 0.2, y: 0.25, z: -0.1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.2, y: 0.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8384841133000500991}
-  m_LocalEulerAnglesHint: {x: 5, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4933505247852799712
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1010,7 +1010,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e76f6b40685a7d545b740815bf0b3908, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3803525476086332898}
+      addedObject: {fileID: 8185194974022324081}
     - targetCorrespondingSourceObject: {fileID: -4411958660619699668, guid: e76f6b40685a7d545b740815bf0b3908, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6317787847565171218}
@@ -1043,7 +1043,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: e76f6b40685a7d545b740815bf0b3908, type: 3}
   m_PrefabInstance: {fileID: 8346940222577656084}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &3803525476086332898
+--- !u!114 &8185194974022324081
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1052,17 +1052,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 9157823798414965829}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72a90f2113466e14f988aa59a4ae5b9a, type: 3}
+  m_Script: {fileID: 11500000, guid: 912a671cebcea3f4eb179a27ef34f8f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseControllerType: 0
-  healthCurrent: 0
-  healthMax: 0
-  damageBase: 0
-  criticalRate: 0
-  ciriticalDamage: 0
-  damageReducePercent: 0
-  walkSpeedBase: 5
-  runSpeedBase: 0
-  isRunning: 0
-  isInvincible: 0
+  rotateSpeed: 20
+  localPlayerVisible: 1
+  otherPlayerVisible: 0

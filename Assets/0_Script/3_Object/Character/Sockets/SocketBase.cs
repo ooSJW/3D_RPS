@@ -11,8 +11,8 @@ public partial class SocketBase : MonoBehaviour // Data Field
 {
     [SerializeField] private SocketType socketTtype;
     public SocketType SocketType => socketTtype;
-
 }
+
 public partial class SocketBase // Initialize
 {
     public void Initialize()
@@ -54,4 +54,8 @@ public partial class SocketBase : MonoBehaviour //
         if (result is null)
             result = GetSocket(wantType);
     }
+
+    public void SocketAction(Action<SocketBase> wantAction) { wantAction(this); }
+    public void SocketActionByType(SocketType wantType, Action<SocketBase> wantAction) { if (wantType == SocketType) wantAction(this); }
+    public void SocketActionByPredicate(Func<SocketBase, bool> predicate, Action<SocketBase> wantAction) { if (predicate(this)) wantAction(this); }
 }

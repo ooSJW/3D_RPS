@@ -48,12 +48,22 @@ public partial class CameraManager : MonoBehaviour, IManagerBase // Property
     private void CharacterChanged(CharacterBase newTarget)
     {
         targetCharacter = newTarget;
-        DisplayCharacterView(targetCharacter);
+        if (newTarget)
+        {
+            mainCamera.transform.SetParent(newTarget.GetSocket(SocketType.CameraOffset)?.transform ?? newTarget.transform);
+            mainCamera.transform.localPosition = Vector3.zero;
+            DisplayCharacterView(targetCharacter);
+        }
+        else
+        {
+            mainCamera.transform.parent = null;
+        }
     }
 
     private void DisplayCharacterView(CharacterBase wantCharacter)
     {
-        mainCamera.transform.position = wantCharacter.transform.position;
+        if (wantCharacter is null) return;
+        // mainCamera.transform.position = wantCharacter.GetSocket(SocketType.CameraOffset).transform.position;
         mainCamera.transform.forward = wantCharacter.Forward;
     }
 

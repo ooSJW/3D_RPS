@@ -16775,68 +16775,6 @@ Transform:
   - {fileID: 1748877440422382617}
   m_Father: {fileID: 1748877440901034881}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &3889338988276832763
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 1748877441677006557}
-    m_Modifications:
-    - target: {fileID: 3041704967678796207, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 18.571
-      objectReference: {fileID: 0}
-    - target: {fileID: 3041704967678796207, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -3.6139987
-      objectReference: {fileID: 0}
-    - target: {fileID: 3041704967678796207, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -0.06477356
-      objectReference: {fileID: 0}
-    - target: {fileID: 3041704967678796207, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3041704967678796207, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3041704967678796207, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3041704967678796207, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3041704967678796207, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3041704967678796207, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 180
-      objectReference: {fileID: 0}
-    - target: {fileID: 3041704967678796207, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3295781638740590940, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-      propertyPath: m_Name
-      value: SK_Military_Survivalist (10)
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
---- !u!4 &2292327509109798996 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3041704967678796207, guid: 7bb7ca442c055b341ae45b8e7f986c3d, type: 3}
-  m_PrefabInstance: {fileID: 3889338988276832763}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4952014187124996635
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16898,4 +16836,66 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 6590715773910304917, guid: f95c9d423f7bdf54e90148023253ba70, type: 3}
   m_PrefabInstance: {fileID: 4952014187124996635}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &8571590281517249016
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1748877441677006557}
+    m_Modifications:
+    - target: {fileID: 7582826243735603628, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 18.571
+      objectReference: {fileID: 0}
+    - target: {fileID: 7582826243735603628, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -3.6139987
+      objectReference: {fileID: 0}
+    - target: {fileID: 7582826243735603628, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.06477356
+      objectReference: {fileID: 0}
+    - target: {fileID: 7582826243735603628, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7582826243735603628, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7582826243735603628, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7582826243735603628, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7582826243735603628, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7582826243735603628, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 7582826243735603628, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7976197329700301151, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+      propertyPath: m_Name
+      value: SK_Military_Survivalist (10)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+--- !u!4 &2292327509109798996 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7582826243735603628, guid: e263c07f2c5d0994ebaf56cb67b7145d, type: 3}
+  m_PrefabInstance: {fileID: 8571590281517249016}
   m_PrefabAsset: {fileID: 0}

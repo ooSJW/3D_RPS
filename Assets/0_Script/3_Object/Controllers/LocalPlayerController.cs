@@ -14,8 +14,12 @@ public partial class LocalPlayerController : PlayerController // Initialize
         {
             UserInputManager.OnMoveInput -= OnMoveInput;
             UserInputManager.OnMoveInput += OnMoveInput;
+
             UserInputManager.OnLookInput -= OnLookInput;
             UserInputManager.OnLookInput += OnLookInput;
+
+            UserInputManager.OnAttackInput -= OnAttackInput;
+            UserInputManager.OnAttackInput += OnAttackInput;
             UserInputManager.OnMenuInput += () => GameManager.SetMouseLock(!GameManager.GetMouseLock());
         }
 
@@ -57,5 +61,11 @@ public partial class LocalPlayerController : PlayerController
         // * 감도
         inputValue *= 0.5f;
         ControlCharacterBase.AddRotation(-inputValue.x, inputValue.y);
+    }
+
+    private void OnAttackInput(bool value)
+    {
+        // CharacterBase.Attack에서 OnAttack delegate 호출
+        ControlCharacterBase.Attack(ControlCharacterBase.Forward, value);
     }
 }
