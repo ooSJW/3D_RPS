@@ -343,6 +343,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5681a7b60bef3d54e83b0c90dd712ecf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  attackMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  trajectoryCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: -0.011044166
+      outSlope: -0.011044166
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.838132
+      value: -0.009256469
+      inSlope: -0.1744048
+      outSlope: -0.1744048
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.934456
+      value: -0.041791372
+      inSlope: -0.6189848
+      outSlope: -0.6189848
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 1
+    - serializedVersion: 3
+      time: 1.0040894
+      value: -0.097717285
+      inSlope: -0.8031482
+      outSlope: -0.8031482
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!4 &7257972473370928327 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3667035316168246092, guid: 506bdd29c1d71e14ea529fc14be8d93a, type: 3}

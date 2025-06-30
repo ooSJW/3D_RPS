@@ -103,13 +103,6 @@ public partial class CharacterBase // Initialize
     {
         AddSocket(GetComponentsInChildren<SocketBase>());
 
-        SocketBase[] test = GetSockets();
-        if (test is not null)
-            foreach (var current in test)
-            {
-                Debug.Log($"{current.gameObject.name} / {current.GetType()}");
-            }
-
         foreach (CharacterModuleBase currentModule in GetComponentsInChildren<CharacterModuleBase>())
         {
             currentModule.Attach(this);

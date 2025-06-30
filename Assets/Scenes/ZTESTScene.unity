@@ -1274,6 +1274,10 @@ PrefabInstance:
       propertyPath: baseControllerType
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 9186497254951088627, guid: 49fc7ef8bb6cb164080c9d1e361dc98d, type: 3}
+      propertyPath: attackMask.m_Bits
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -467,4 +467,147 @@ public static class Extensions
         target.y = 0; target.Normalize();
         return target;
     }
+
+
+    public static bool RaycastWithDebug(this Ray ray, out RaycastHit hit, float distance, LayerMask mask, float duration = 1f)
+    {
+        // Ray Cast => 선을 던짐.
+
+        // QueryTriggerInteraction : 기본값 => UseGolbal = Physics옵션에 정의된 설정을 따름. ( 기본적으로 트리거 확인X )
+        //                         : Collide : 트리거 확인
+        //                         : Ignore : 트리거 확인 X
+        if (Physics.Raycast(ray, out hit, distance, mask))
+        {
+            float hitDistance = hit.distance;
+            Debug.DrawRay(ray.origin, ray.direction * hitDistance, Color.green, duration);
+            Debug.DrawRay(hit.point, ray.direction * (distance - hitDistance), Color.red, duration);
+            return true;
+        }
+        else
+        {
+            Debug.DrawRay(ray.origin, ray.direction * distance, Color.green, duration);
+            return false;
+        }
+    }
+
+
+    public static bool ParabolaCastWithDebug(this Ray ray, out RaycastHit hit, float distance, LayerMask mask, Vector3 gravity, float time = 0.3f, int resolution = 4, float duration = 1.0f)
+    {
+        hit = new();
+
+        Vector3 originDirection = ray.direction;
+
+        float eachTime = time / resolution;
+        float eachDistance = distance / resolution;
+
+        bool result = false;
+
+        for (int i = 0; i < resolution; i++)
+        {
+            float accumulateTime = i * eachTime;
+            ray.direction = (originDirection + (accumulateTime * accumulateTime / 2 * gravity)).normalized;
+
+            if (result)
+            {
+                Debug.DrawRay(ray.origin, ray.direction * eachDistance, Color.red);
+            }
+            else if (ray.RaycastWithDebug(out hit, eachDistance, mask))
+            {
+                result = true;
+            }
+            ray.origin += ray.direction * eachDistance;
+        }
+        return result;
+    }
+
+    public static bool ParabolaCast(this Ray ray, out RaycastHit hit, float distance, LayerMask mask, Vector3 gravity, float time = 0.3f, int resolution = 4, float duration = 1.0f)
+    {
+        Vector3 originDirection = ray.direction;
+
+        float eachTime = time / resolution;
+        float eachDistance = distance / resolution;
+
+        for (int i = 0; i < resolution; i++)
+        {
+            float accumulateTime = i * eachTime;
+            ray.direction = (originDirection + (accumulateTime * accumulateTime / 2 * gravity));
+
+            if (Physics.Raycast(ray, out hit, eachDistance, mask))
+                return true;
+
+            ray.origin += ray.direction * eachDistance;
+        }
+
+        hit = new();
+        return false;
+    }
+
+    public static bool CurveCastWithDebug(this Ray ray, out RaycastHit hit, float distance, LayerMask mask, AnimationCurve verticalCurve, int resolution, float duration)
+    {
+        if (resolution < 2)
+            return Physics.Raycast(ray, out hit, distance, mask);
+
+        float eachDistance = distance / resolution;
+
+        Vector3 originDirection = ray.direction;
+        Vector3 upDirection = ray.direction.RotationVertical(90.0f);
+
+        Vector3[] points = new Vector3[resolution + 1];
+        points[0] = ray.origin;
+
+        for (int i = 1; i < points.Length; i++)
+        {
+            float currentTime = (i + 1) / (float)resolution;
+            points[i] = points[i - 1] + (ray.direction * eachDistance) + upDirection * verticalCurve.Evaluate(currentTime);
+        }
+
+        hit = default;
+        bool result = false;
+        for (int i = 0; i < resolution; i++)
+        {
+            Vector3 direction = points[i + 1] - points[i];
+            ray.origin = points[i];
+            ray.direction = direction;
+
+            if (result)
+                Debug.DrawRay(ray.origin, direction, Color.red, duration);
+            else if (ray.RaycastWithDebug(out hit, direction.magnitude, mask, duration))
+            {
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    public static bool CurveCast(this Ray ray, out RaycastHit hit, float distance, LayerMask mask, AnimationCurve verticalCurve, int resolution, float duration)
+    {
+        if (resolution < 2)
+            return Physics.Raycast(ray, out hit, distance, mask);
+
+        float eachDistance = distance / resolution;
+
+        Vector3 originDirection = ray.direction;
+        Vector3 upDirection = ray.direction.RotationVertical(90.0f);
+
+        Vector3[] points = new Vector3[resolution + 1];
+        points[0] = ray.origin;
+
+        for (int i = 1; i < points.Length; i++)
+        {
+            float currentTime = (i + 1) / (float)resolution;
+            points[i] = points[i - 1] + (ray.direction * eachDistance) + upDirection * verticalCurve.Evaluate(currentTime);
+        }
+
+        hit = default;
+        for (int i = 0; i < resolution; i++)
+        {
+            Vector3 direction = points[i + 1] - points[i];
+            ray.origin = points[i];
+            ray.direction = direction;
+
+            if (Physics.Raycast(ray, out hit, direction.magnitude, mask))
+                return true;
+        }
+        return false;
+    }
 }

@@ -55,7 +55,12 @@ public partial class SocketBase : MonoBehaviour //
             result = GetSocket(wantType);
     }
 
-    public void SocketAction(Action<SocketBase> wantAction) { wantAction(this); }
-    public void SocketActionByType(SocketType wantType, Action<SocketBase> wantAction) { if (wantType == SocketType) wantAction(this); }
-    public void SocketActionByPredicate(Func<SocketBase, bool> predicate, Action<SocketBase> wantAction) { if (predicate(this)) wantAction(this); }
+    public void SocketAction(Action<SocketBase> wantAction)
+    { if (gameObject.activeInHierarchy) wantAction(this); }
+
+    public void SocketActionByType(SocketType wantType, Action<SocketBase> wantAction)
+    { if (gameObject.activeInHierarchy && wantType == SocketType) wantAction(this); }
+
+    public void SocketActionByPredicate(Func<SocketBase, bool> predicate, Action<SocketBase> wantAction)
+    { if (gameObject.activeInHierarchy && predicate(this)) wantAction(this); }
 }

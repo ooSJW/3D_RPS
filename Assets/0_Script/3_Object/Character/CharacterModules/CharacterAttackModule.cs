@@ -1,10 +1,12 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 
 
 public partial class CharacterAttackModule : CharacterModuleBase
 {
-
+    [SerializeField] private LayerMask attackMask;
+    [SerializeField] private AnimationCurve trajectoryCurve;
 }
 
 
@@ -29,8 +31,17 @@ public partial class CharacterAttackModule : CharacterModuleBase
         }
     }
 
-    public void OnAttack(Vector3 direction, bool isDown)
+    public virtual void OnAttack(Vector3 direction, bool isDown)
     {
-        Owner?.SocketActionByType(SocketType.Muzzle, (socket) => { Debug.Log($"{socket.name}: Attack"); });
+        Owner?.SocketActionByType(SocketType.Muzzle, TriggerAttackAtSocket);
     }
+    public virtual void TriggerAttackAtSocket(SocketBase targetSocket)
+    {
+        Ray ray = new(targetSocket.transform.position, targetSocket.transform.forward);
+        if (ray.CurveCastWithDebug(out RaycastHit hit, 20.0f, attackMask, trajectoryCurve, 8, 1.0f))
+        {
+            Debug.Log(hit.collider.name);
+        }
+    }
+
 }
