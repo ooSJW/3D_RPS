@@ -37,5 +37,18 @@ public enum ControllerType
 {
     LocalPlayerController,
     AIController,
-    ControllerEnd,
+    Length,
+}
+
+public enum EffectType
+{
+    BulletHitEffect,
+    MuzzleFlash,
+    Length,
+}
+
+public enum ObjectType
+{
+    HealthPack,
+    Length,
 }

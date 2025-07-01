@@ -965,6 +965,11 @@ MonoBehaviour:
   requestController:
   - wantType: 0
     amount: 10
+  requestEffect:
+  - wantType: 0
+    amount: 50
+  - wantType: 1
+    amount: 100
   rootTransform: {fileID: 0}
 --- !u!1 &1291504126
 GameObject:
@@ -1212,6 +1217,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6588339586270198197, guid: 49fc7ef8bb6cb164080c9d1e361dc98d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7031263157039574438, guid: 49fc7ef8bb6cb164080c9d1e361dc98d, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7257972473370928327, guid: 49fc7ef8bb6cb164080c9d1e361dc98d, type: 3}

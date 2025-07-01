@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Somke
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: -118280812, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+    - {fileID: 1938157470, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+    - {fileID: 2108885650, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+    - {fileID: -1270797204, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+    - {fileID: -1324905012, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+    - {fileID: -793474, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+    - {fileID: 373040155, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+    - {fileID: 364045091, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+    - {fileID: 765757419, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+    - {fileID: -1010111170, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys:
+    - 92c40e5453f12294dad4246796e1d211: -118280812
+    - 92c40e5453f12294dad4246796e1d211: 1938157470
+    - 92c40e5453f12294dad4246796e1d211: 2108885650
+    - 92c40e5453f12294dad4246796e1d211: -1270797204
+    - 92c40e5453f12294dad4246796e1d211: -1324905012
+    - 92c40e5453f12294dad4246796e1d211: -793474
+    - 92c40e5453f12294dad4246796e1d211: 373040155
+    - 92c40e5453f12294dad4246796e1d211: 364045091
+    - 92c40e5453f12294dad4246796e1d211: 765757419
+    - 92c40e5453f12294dad4246796e1d211: -1010111170
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: -118280812, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+  - {fileID: 1938157470, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+  - {fileID: 2108885650, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+  - {fileID: -1270797204, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+  - {fileID: -1324905012, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+  - {fileID: -793474, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+  - {fileID: 373040155, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+  - {fileID: 364045091, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+  - {fileID: 765757419, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+  - {fileID: -1010111170, guid: 92c40e5453f12294dad4246796e1d211, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Free Smoke Fx  Pixel 05_0
+  - Free Smoke Fx  Pixel 05_1
+  - Free Smoke Fx  Pixel 05_2
+  - Free Smoke Fx  Pixel 05_3
+  - Free Smoke Fx  Pixel 05_4
+  - Free Smoke Fx  Pixel 05_5
+  - Free Smoke Fx  Pixel 05_6
+  - Free Smoke Fx  Pixel 05_7
+  - Free Smoke Fx  Pixel 05_8
+  - Free Smoke Fx  Pixel 05_9
+  m_RenderDataMap: {}
+  m_Tag: Somke
+  m_IsVariant: 0

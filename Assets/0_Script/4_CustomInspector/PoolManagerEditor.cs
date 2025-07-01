@@ -23,6 +23,7 @@ public partial class PoolManagerEditor : Editor // Editor 상속
 
     private TableState characterTable;
     private TableState controllerTable;
+    private TableState effectTable;
 }
 
 public partial class PoolManagerEditor : Editor // Main
@@ -31,9 +32,10 @@ public partial class PoolManagerEditor : Editor // Main
     // 직렬화 된 오브젝트만 받을 수 있음.
     private void OnEnable()
     {
-        // 모든 씬에 존재하는 상단에 선언된 오브젝트를 가진 gameObject를 뜻함. (현재는 PoolManager를 가진 모든 오브젝트를 순환하는 방식.)
+        // 상단에 선언된 스크립트를 가진 모든 씬에 존재하는 gameObject를 뜻함. (현재는 PoolManager를 가진 모든 오브젝트를 순환하는 방식.)
         characterTable.Set(serializedObject.FindProperty("requestCharacter"));
         controllerTable.Set(serializedObject.FindProperty("requestController"));
+        effectTable.Set(serializedObject.FindProperty("requestEffect"));
     }
 }
 
@@ -45,6 +47,7 @@ public partial class PoolManagerEditor : Editor // Property
 
         DrawTable(ref characterTable);
         DrawTable(ref controllerTable);
+        DrawTable(ref effectTable);
 
         // 변경된 사항을 실제 오브젝트에 적용.
         serializedObject.ApplyModifiedProperties();

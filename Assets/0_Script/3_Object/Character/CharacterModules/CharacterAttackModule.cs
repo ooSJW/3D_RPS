@@ -40,7 +40,7 @@ public partial class CharacterAttackModule : CharacterModuleBase
         Ray ray = new(targetSocket.transform.position, targetSocket.transform.forward);
         if (ray.CurveCastWithDebug(out RaycastHit hit, 20.0f, attackMask, trajectoryCurve, 8, 1.0f))
         {
-            Debug.Log(hit.collider.name);
+            PoolManager.ClaimSpawn(EffectType.BulletHitEffect.ToString(), hit.point + (hit.normal * 0.01f), Quaternion.LookRotation(hit.normal));
         }
     }
 

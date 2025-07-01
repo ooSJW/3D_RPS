@@ -13,6 +13,7 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Data Field
 
     private static Dictionary<CharacterType, GameObject> characterPrefabDict;
     private static Dictionary<ControllerType, GameObject> controllerPrefabDict;
+    private static Dictionary<EffectType, GameObject> effectPrefabDict;
 
     private string mainDirectory;
     private string saveDirectory;
@@ -43,6 +44,7 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Initialize
 
         yield return InitializeCharacterPrefabs();
         yield return InitializeControllerPrefabs();
+        yield return InitializeEffectPrefabs();
 
         yield break;
     }
@@ -101,11 +103,24 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
       (
           controllerPrefabDict, "Prefabs/Controllers",
           (int)ControllerType.LocalPlayerController,
-          (int)ControllerType.ControllerEnd,
+          (int)ControllerType.Length,
           (index) => Enum.IsDefined(typeof(ControllerType), index) ? (ControllerType)index : null
       );
     }
 
+    private IEnumerator InitializeEffectPrefabs()
+    {
+        if (effectPrefabDict is not null) yield break;
+
+        effectPrefabDict = new();
+        yield return InitializePrefabs
+      (
+          effectPrefabDict, "Prefabs/Effects",
+          (int)EffectType.BulletHitEffect,
+          (int)EffectType.Length,
+          (index) => Enum.IsDefined(typeof(EffectType), index) ? (EffectType)index : null
+      );
+    }
 
     //                                                                                                 where T : struct, Enum : 값 타입 자료만 받을 수 있음
     public IEnumerator InitializePrefabs<T>(Dictionary<T, GameObject> prefabDict, string directory, int startIndex, int lastIndex, Func<int, T?> Converter) where T : struct, Enum
@@ -193,4 +208,6 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
         => characterPrefabDict.TryGetValue(wantType, out GameObject result) ? result : null;
     public static GameObject GetControllerPrefab(ControllerType wantType)
           => controllerPrefabDict.TryGetValue(wantType, out GameObject result) ? result : null;
+    public static GameObject GetEffectPrefab(EffectType wantType)
+      => effectPrefabDict.TryGetValue(wantType, out GameObject result) ? result : null;
 }

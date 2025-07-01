@@ -11,6 +11,8 @@ public struct PoolRequestCharacter { public CharacterType wantType; public int a
 
 [System.Serializable]
 public struct PoolRequestController { public ControllerType wantType; public int amount; }
+[System.Serializable]
+public struct PoolRequestEffect { public EffectType wantType; public int amount; }
 
 
 public delegate GameObject DelegateSpawn(string name, Vector3 position, Quaternion rotation, Vector3 scale, Transform parent, Space coord);
@@ -24,6 +26,7 @@ public partial class PoolManager : MonoBehaviour, IManagerBase // Data Field
 
     [SerializeField] private PoolRequestCharacter[] requestCharacter = new PoolRequestCharacter[0];
     [SerializeField] private PoolRequestController[] requestController = new PoolRequestController[0];
+    [SerializeField] private PoolRequestEffect[] requestEffect = new PoolRequestEffect[0];
 
     private Dictionary<string, Queue<GameObject>> poolableObjectDict = new();
 
@@ -49,6 +52,24 @@ public partial class PoolManager : MonoBehaviour, IManagerBase // Initialize
                 FileManager.GetCharacterPrefab(current.wantType),
                 current.amount
                 );
+        }
+
+        foreach (var currentController in requestController)
+        {
+            RegisterPoolObject
+            (
+            FileManager.GetControllerPrefab(currentController.wantType),
+            currentController.amount
+             );
+        }
+
+        foreach (var currentEffect in requestEffect)
+        {
+            RegisterPoolObject
+            (
+            FileManager.GetEffectPrefab(currentEffect.wantType),
+            currentEffect.amount
+             );
         }
 
         yield break;
@@ -212,6 +233,10 @@ public partial class PoolManager : MonoBehaviour, IManagerBase // Property
     public static GameObject ClaimSpawn(string key, Transform parent, Vector3 position)
     {
         return OnSpawn?.Invoke(key, position, Quaternion.identity, Vector3.one, parent, Space.Self);
+    }
+    public static GameObject ClaimSpawn(string key, Vector3 position, Quaternion rotation)
+    {
+        return OnSpawn?.Invoke(key, position, rotation, Vector3.one, null, Space.Self);
     }
     public static GameObject ClaimSpawn(string key, Transform parent)
     {
