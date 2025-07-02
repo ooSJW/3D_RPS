@@ -1,4 +1,4 @@
-using Unity.VisualScripting;
+using System;
 using UnityEngine;
 
 
@@ -7,6 +7,7 @@ public partial class CharacterAttackModule : CharacterModuleBase
 {
     [SerializeField] private LayerMask attackMask;
     [SerializeField] private AnimationCurve trajectoryCurve;
+    [SerializeField] private WeaponBase currentWeapon;
 }
 
 
@@ -19,6 +20,8 @@ public partial class CharacterAttackModule : CharacterModuleBase
         {
             Owner.OnAttack -= OnAttack;
             Owner.OnAttack += OnAttack;
+            GameManager.OnObjectUpdate -= OnUpdate;
+            GameManager.OnObjectUpdate += OnUpdate;
         }
     }
 
@@ -28,20 +31,26 @@ public partial class CharacterAttackModule : CharacterModuleBase
         if (Owner is not null)
         {
             Owner.OnAttack -= OnAttack;
+            GameManager.OnObjectUpdate -= OnUpdate;
+        }
+    }
+
+    public virtual void OnUpdate(float deltaTime)
+    {
+        if (Owner && currentWeapon)
+        {
+            currentWeapon.TimeUpdate();
+            Owner.SocketActionByType(SocketType.Muzzle, currentWeapon.ShotUpdate);
         }
     }
 
     public virtual void OnAttack(Vector3 direction, bool isDown)
     {
-        Owner?.SocketActionByType(SocketType.Muzzle, TriggerAttackAtSocket);
-    }
-    public virtual void TriggerAttackAtSocket(SocketBase targetSocket)
-    {
-        Ray ray = new(targetSocket.transform.position, targetSocket.transform.forward);
-        if (ray.CurveCastWithDebug(out RaycastHit hit, 20.0f, attackMask, trajectoryCurve, 8, 1.0f))
+        if (Owner is not null && currentWeapon is not null)
         {
-            PoolManager.ClaimSpawn(EffectType.BulletHitEffect.ToString(), hit.point + (hit.normal * 0.01f), Quaternion.LookRotation(hit.normal));
+            Action<SocketBase> attackAction = isDown ? currentWeapon.ShotStart : currentWeapon.ShotEnd;
+            currentWeapon.TimeUpdate();
+            Owner.SocketActionByType(SocketType.Muzzle, attackAction);
         }
     }
-
 }

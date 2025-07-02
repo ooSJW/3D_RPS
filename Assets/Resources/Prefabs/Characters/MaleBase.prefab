@@ -388,6 +388,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  currentWeapon: {fileID: 4480937468795588638}
 --- !u!4 &7257972473370928327 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3667035316168246092, guid: 506bdd29c1d71e14ea529fc14be8d93a, type: 3}
@@ -467,3 +468,14 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5917604137509476006, guid: f9caa36d43bcbf949bbb4203d6012d00, type: 3}
   m_PrefabInstance: {fileID: 6365107128928136756}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4480937468795588638 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: -1839126888512094678, guid: f9caa36d43bcbf949bbb4203d6012d00, type: 3}
+  m_PrefabInstance: {fileID: 6365107128928136756}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac9391e54a5cae142b6fe72a53e3e725, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

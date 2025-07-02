@@ -54,6 +54,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5917604137509476006}
+  - component: {fileID: -1839126888512094678}
   m_Layer: 6
   m_Name: FR_M4a1
   m_TagString: Untagged
@@ -77,6 +78,42 @@ Transform:
   - {fileID: 5561475300605078239}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-1839126888512094678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6647794920924033712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac9391e54a5cae142b6fe72a53e3e725, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponType: 0
+  attackMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  trajectoryCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  currentShotType: 1
+  availableShotTypes: 00000000020000000300000001000000
+  bulletHitType: 0
+  shotDelayMax: 0.08
+  burstDelay: 0.05
+  damageMin: 4
+  damageMax: 6
+  shotVerticalSpread: 10
+  shotHorizontalSpread: 5
+  shotAmount: 1
+  burstAmount: 3
+  magazineMax: 31
+  reloadFailAnimation: 
+  reloadStartAnimation: 
 --- !u!1 &7898859577677076445
 GameObject:
   m_ObjectHideFlags: 0
