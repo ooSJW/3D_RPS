@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum WeaponType
 {
-    AssaultRifle, Pistol, SniperRifle, ShootGun, SubMachineGun, Melee
+    M4a1, Aug, Pistol, SniperRifle, ShootGun, SubMachineGun, Melee
 }
 public enum ShotType
 {
@@ -18,7 +18,9 @@ public enum BulletHitType
 
 public delegate void DelegateShotTypeChanged(ShotType newType);
 public delegate void DelegateShotFunction(SocketBase from, Ray ray);
+public delegate void DelegateShotAnimation(AnimationType wantType);
 
+[RequireComponent(typeof(Animator))]
 public partial class WeaponBase : MonoBehaviour // Data Field
 {
     [SerializeField] private WeaponType weaponType;
@@ -27,6 +29,7 @@ public partial class WeaponBase : MonoBehaviour // Data Field
 
     public event DelegateShotTypeChanged OnShotTypeChanged;
     public event DelegateShotFunction OnShotFunction;
+    public event DelegateShotAnimation OnShotAnimation;
 
     [SerializeField] private ShotType currentShotType;
     public ShotType CurrentShotType
@@ -41,7 +44,6 @@ public partial class WeaponBase : MonoBehaviour // Data Field
             OnShotTypeChanged?.Invoke(CurrentShotType);
         }
     }
-
 
     [SerializeField] private ShotType[] availableShotTypes = new ShotType[] { ShotType.Single };
     private int currentShotIndex;
@@ -75,6 +77,10 @@ public partial class WeaponBase : MonoBehaviour // Data Field
         }
     }
 
+    [SerializeField] private AmmoType requireAmmo;
+    public AmmoType RequireAmmo => requireAmmo;
+
+
     [SerializeField] private float shotDelayMax;
     [SerializeField] private float burstDelay;
     protected float shotDelayLeft;
@@ -95,16 +101,21 @@ public partial class WeaponBase : MonoBehaviour // Data Field
     protected float startShotTime;
     protected float currentTime;
 
-    [SerializeField] string reloadFailAnimation;
-    [SerializeField] string reloadStartAnimation;
+    [SerializeField] string reloadFailAnimation = "ReloadFail";
+    [SerializeField] string reloadStartAnimation = "Reload";
 
     public bool Attackable { get; protected set; }
     private bool isFiring = false;
+
+    private Animator animator;
 }
 public partial class WeaponBase : MonoBehaviour // Initialize
 {
     private void Awake()
     {
+        animator = GetComponent<Animator>();
+        OnShotAnimation -= TriggerWeaponAnimation;
+        OnShotAnimation += TriggerWeaponAnimation;
         // 에디터에 설정한 값 적용, index반영, 예외처리, ShotType변경 이벤트 호출
         CurrentShotType = CurrentShotType;
         BulletHitType = BulletHitType;
@@ -125,6 +136,20 @@ public partial class WeaponBase : MonoBehaviour // Initialize
 }
 public partial class WeaponBase : MonoBehaviour // 
 {
+    public virtual AnimationType GetWeaponAnimationType()
+    {
+        switch (weaponType)
+        {
+            case WeaponType.Aug:
+                return AnimationType.Aug;
+            case WeaponType.ShootGun:
+                return AnimationType.ShotGun;
+            default:
+                return AnimationType.M4a1;
+        }
+    }
+
+
     /// <summary>장전 시작</summary>
     /// <param name="spareAmmo">남은 장탄 수</param>
     /// <returns>시작할 애니메이션 이름</returns>
@@ -145,6 +170,8 @@ public partial class WeaponBase : MonoBehaviour //
         magazineCurren += filledCount;
         return filledCount;
     }
+
+
 
     public virtual void ChangeShotType() => CurrentShotIndex++;
 
@@ -189,13 +216,20 @@ public partial class WeaponBase : MonoBehaviour //
         currentTime = Time.time;
     }
 
+    public virtual void TriggerWeaponAnimation(AnimationType wantType) => animator.SetTrigger(wantType.ToString());
+    public virtual void ShotAnimation()
+    {
+        OnShotAnimation?.Invoke(AnimationType.Shot);
+    }
+
     // force : "강제하다" 라는 의미로 사용
     // or : 왼쪽 부터 true를 만나는 순간 종료 => true가능성이 가장 높고 빠른 연산을 왼쪽에 두는 것이 성능에 유리함
-    // and : 왼쪽 부터 flat를 만나는 순간 종료 => flat가능성이 가장 높고 빠른 연산을 왼쪽에 두는 것이 성능에 유리함
+    // and : 왼쪽 부터 flat를 만나는 순간 종료 => false가능성이 가장 높고 빠른 연산을 왼쪽에 두는 것이 성능에 유리함
     public virtual void Shot(SocketBase from, bool force = false)
     {
         if (force || shotDelayLeft == currentTime || shotDelayLeft + shotDelayMax <= currentTime)
         {
+            ShotAnimation();
             accumulateShotTime = currentTime - startShotTime;
             Vector3 originDirection = from.transform.forward;
             Ray ray = new(from.transform.position, originDirection);

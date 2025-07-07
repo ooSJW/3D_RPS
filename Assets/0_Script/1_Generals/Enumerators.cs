@@ -52,3 +52,13 @@ public enum ObjectType
     HealthPack,
     Length,
 }
+
+public enum AnimationType
+{
+    Draw, Reload, Shot, Holstering, M4a1, Aug, ShotGun
+}
+
+public enum AmmoType
+{
+    AR, Pistol, Slug
+}

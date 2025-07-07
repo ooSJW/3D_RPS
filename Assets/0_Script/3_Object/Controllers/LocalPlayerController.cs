@@ -14,12 +14,13 @@ public partial class LocalPlayerController : PlayerController // Initialize
         {
             UserInputManager.OnMoveInput -= OnMoveInput;
             UserInputManager.OnMoveInput += OnMoveInput;
-
             UserInputManager.OnLookInput -= OnLookInput;
             UserInputManager.OnLookInput += OnLookInput;
-
             UserInputManager.OnAttackInput -= OnAttackInput;
             UserInputManager.OnAttackInput += OnAttackInput;
+            UserInputManager.OnReloadInput -= OnReloadInput;
+            UserInputManager.OnReloadInput += OnReloadInput;
+
             UserInputManager.OnMenuInput += () => GameManager.SetMouseLock(!GameManager.GetMouseLock());
         }
 
@@ -30,12 +31,14 @@ public partial class LocalPlayerController : PlayerController // Initialize
     {
         base.UnPossess(causedBy);
         UserInputManager.OnMoveInput -= OnMoveInput;
+        UserInputManager.OnReloadInput -= OnReloadInput;
     }
 
     public override void OnCharacterDie()
     {
         base.OnCharacterDie();
         UserInputManager.OnMoveInput -= OnMoveInput;
+        UserInputManager.OnReloadInput -= OnReloadInput;
     }
 }
 
@@ -67,5 +70,10 @@ public partial class LocalPlayerController : PlayerController
     {
         // CharacterBase.Attack에서 OnAttack delegate 호출
         ControlCharacterBase.Attack(ControlCharacterBase.Forward, value);
+    }
+
+    private void OnReloadInput()
+    {
+        ControlCharacterBase.Reload();
     }
 }

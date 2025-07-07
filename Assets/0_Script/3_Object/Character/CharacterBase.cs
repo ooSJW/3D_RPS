@@ -7,6 +7,7 @@ public delegate void DelegateCharacterMove(CharacterBase mover, Vector3 velocity
 public delegate void DelegateCharacterAim(Vector3 direction);
 public delegate void DelegateCharacterAttack(Vector3 direction, bool value);
 public delegate void DelegateCharacterJump();
+public delegate void DelegateCharacterReload();
 public delegate void DelegateCharacterRun(bool value);
 public delegate void DelegateCharacterDie();
 public delegate void DelegateCharacterInteraction(GameObject target);
@@ -14,13 +15,17 @@ public delegate void DelegateCharacterOwnerChanged(ControllerBase newController)
 
 public delegate int DelegateCharacterGetDamage(int damage, Vector3 direction, bool isCritical, GameObject causer);
 public delegate void DelegateCharacterSendDamage(ref int totalDamage, ref float multiplier, ref bool isCritical);
+public delegate void DelegatCharacterAnimaionPlay(AnimationType wanType);
+public delegate void DelegatCharacterAnimaionTrigger(string wantTrigger);
 
-public partial class CharacterBase : MonoBehaviour, IPoolable, ISocketContainer // Delegate Field
+public partial class CharacterBase : MonoBehaviour, IPoolable, ISocketContainer // Delegate
 {
+    public event Action OnModuleLoaded;
     public event DelegateCharacterMove OnMove;
     public event DelegateCharacterAim OnAim;
     public event DelegateCharacterAttack OnAttack;
     public event DelegateCharacterJump OnJump;
+    public event DelegateCharacterReload OnReload;
     public event DelegateCharacterRun OnRun;
     public event DelegateCharacterDie OnDie;
     public event DelegateCharacterInteraction OnInteraction;
@@ -38,9 +43,11 @@ public partial class CharacterBase : MonoBehaviour, IPoolable, ISocketContainer 
 
     public event DelegateCharacterOwnerChanged OnOwnerChanged;
 
-    event DelegateSocketAction OnSocketAction;
-    event DelegateSocketActionByType OnSocketActionByType;
-    event DelegateSocketActionByPredicate OnSocketActionByPredicate;
+    public event DelegateSocketAction OnSocketAction;
+    public event DelegateSocketActionByType OnSocketActionByType;
+    public event DelegateSocketActionByPredicate OnSocketActionByPredicate;
+
+    public event DelegatCharacterAnimaionTrigger OnAnimationTrigger;
 }
 
 public partial class CharacterBase// Data Field
@@ -108,6 +115,7 @@ public partial class CharacterBase // Initialize
             currentModule.Attach(this);
         }
 
+        Invoke(nameof(ModuleLoaded), 0.1f);
 
         GameManager.OnPhysicsUpdate -= UpdateMove;
         GameManager.OnPhysicsUpdate += UpdateMove;
@@ -119,8 +127,14 @@ public partial class CharacterBase // Initialize
     }
 }
 
+
 public partial class CharacterBase
 {
+    public virtual void ModuleLoaded()
+    {
+        OnModuleLoaded?.Invoke();
+    }
+
     public virtual void PossessedBy(ControllerBase newController)
     {
         Controller = newController;
@@ -132,10 +146,18 @@ public partial class CharacterBase
         Controller = null;
         OnOwnerChanged?.Invoke(Controller);
     }
+    public virtual void AnimationPlay(AnimationType wantType)
+    {
+        AnimationPlay(wantType.ToString());
+    }
+    public virtual void AnimationPlay(string wantTrigger)
+    {
+        OnAnimationTrigger?.Invoke(wantTrigger);
+    }
 }
 
 
-public partial class CharacterBase // Delegate Property
+public partial class CharacterBase // Delegate
 {
     public void UpdateMove(float deltaTime)
     {
@@ -147,6 +169,7 @@ public partial class CharacterBase // Delegate Property
     public void Aim(Vector3 direction) => OnAim?.Invoke(direction);
     public void Attack(Vector3 direction, bool value) => OnAttack?.Invoke(direction, value);
     public void Jump() => OnJump?.Invoke();
+    public void Reload() => OnReload?.Invoke();
     public void Run(bool value) => OnRun?.Invoke(value);
     public void Die() => OnDie?.Invoke();
     public void Interaction(GameObject target)
@@ -189,30 +212,6 @@ public partial class CharacterBase // Delegate Property
 
     public void GetSockets(List<SocketBase> result, Func<SocketBase, bool> predicate)
         => OnGetSocketsByPredicate?.Invoke(result, predicate);
-
-
-    public SocketBase[] GetSockets()
-    {
-        if (OnGetSockets is null) return null;
-        List<SocketBase> result = new();
-        OnGetSockets?.Invoke(result);
-        return result.ToArray();
-    }
-
-    public SocketBase[] GetSockets(SocketType wantType)
-    {
-        if (OnGetSockets is null) return null;
-        List<SocketBase> result = new();
-        OnGetSocketsByType?.Invoke(result, wantType);
-        return result.ToArray();
-    }
-    public SocketBase[] GetSockets(Func<SocketBase, bool> predicate)
-    {
-        if (OnGetSockets is null) return null;
-        List<SocketBase> result = new();
-        OnGetSocketsByPredicate?.Invoke(result, predicate);
-        return result.ToArray();
-    }
 
     public void AddSocket(SocketBase target)
     {
@@ -280,6 +279,8 @@ public partial class CharacterBase // Delegate Property
 
     public void SocketActionByPredicate(Func<SocketBase, bool> predicate, Action<SocketBase> wantAction)
         => OnSocketActionByPredicate?.Invoke(predicate, wantAction);
+
+
 }
 public partial class CharacterBase // Property
 {
@@ -306,7 +307,33 @@ public partial class CharacterBase // Property
         SetRotation(Quaternion.LookRotation(Forward).Add(rotation));
     }
 
+    public virtual int GetSpareAmmo(AmmoType wantType) => 200;
+    public virtual void AddSpareAmmo(AmmoType wantType, int delta) { }
+    public virtual void SetSpareAmmo(AmmoType wantType, int amount) { }
 
+
+    public SocketBase[] GetSockets()
+    {
+        if (OnGetSockets is null) return null;
+        List<SocketBase> result = new();
+        OnGetSockets?.Invoke(result);
+        return result.ToArray();
+    }
+
+    public SocketBase[] GetSockets(SocketType wantType)
+    {
+        if (OnGetSockets is null) return null;
+        List<SocketBase> result = new();
+        OnGetSocketsByType?.Invoke(result, wantType);
+        return result.ToArray();
+    }
+    public SocketBase[] GetSockets(Func<SocketBase, bool> predicate)
+    {
+        if (OnGetSockets is null) return null;
+        List<SocketBase> result = new();
+        OnGetSocketsByPredicate?.Invoke(result, predicate);
+        return result.ToArray();
+    }
     public void SetRotation(float yaw, float pitch) => SetRotation(Quaternion.Euler(pitch, yaw, 0));
 
     public void SetRotation(Vector3 wantforward) => Forward = wantforward;
