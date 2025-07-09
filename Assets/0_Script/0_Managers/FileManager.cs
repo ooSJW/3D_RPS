@@ -14,6 +14,7 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Data Field
     private static Dictionary<CharacterType, GameObject> characterPrefabDict;
     private static Dictionary<ControllerType, GameObject> controllerPrefabDict;
     private static Dictionary<EffectType, GameObject> effectPrefabDict;
+    private static Dictionary<ObjectType, GameObject> objectPrefabDict;
 
     private string mainDirectory;
     private string saveDirectory;
@@ -45,6 +46,7 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Initialize
         yield return InitializeCharacterPrefabs();
         yield return InitializeControllerPrefabs();
         yield return InitializeEffectPrefabs();
+        yield return InitializeObjectPrefabs();
 
         yield break;
     }
@@ -121,7 +123,14 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
           (index) => Enum.IsDefined(typeof(EffectType), index) ? (EffectType)index : null
       );
     }
+    private IEnumerator InitializeObjectPrefabs()
+    {
+        if (objectPrefabDict is not null) yield break;
 
+        objectPrefabDict = new();
+        yield return InitializePrefabs(objectPrefabDict, "Prefabs/Objects", (int)ObjectType.FR_M4a1, (int)ObjectType.Length, (index) => Enum.IsDefined(typeof(ObjectType), index) ? (ObjectType)index : null);
+        yield return InitializePrefabs(objectPrefabDict, "Prefabs/Weapons", (int)ObjectType.FR_M4a1, (int)ObjectType.Length, (index) => Enum.IsDefined(typeof(ObjectType), index) ? (ObjectType)index : null);
+    }
     //                                                                                                 where T : struct, Enum : 값 타입 자료만 받을 수 있음
     public IEnumerator InitializePrefabs<T>(Dictionary<T, GameObject> prefabDict, string directory, int startIndex, int lastIndex, Func<int, T?> Converter) where T : struct, Enum
     {
@@ -210,4 +219,6 @@ public partial class FileManager : MonoBehaviour, IManagerBase // Property
           => controllerPrefabDict.TryGetValue(wantType, out GameObject result) ? result : null;
     public static GameObject GetEffectPrefab(EffectType wantType)
       => effectPrefabDict.TryGetValue(wantType, out GameObject result) ? result : null;
+    public static GameObject GetPrefab(ObjectType wantType)
+  => objectPrefabDict.TryGetValue(wantType, out GameObject result) ? result : null;
 }

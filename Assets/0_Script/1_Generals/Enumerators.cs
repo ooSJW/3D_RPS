@@ -43,19 +43,24 @@ public enum ControllerType
 public enum EffectType
 {
     BulletHitEffect,
+    BulletFleshEffect,
     MuzzleFlash,
     Length,
 }
 
 public enum ObjectType
 {
-    HealthPack,
+   // HealthPack,
+    FR_M4a1,
+    FR_AUG,
+    M4a1,
+    AUG,
     Length,
 }
 
 public enum AnimationType
 {
-    Draw, Reload, Shot, Holstering, M4a1, Aug, ShotGun
+    Draw, Reload, Shot, Holstering, M4a1, Aug, ShotGun, Die
 }
 
 public enum AmmoType

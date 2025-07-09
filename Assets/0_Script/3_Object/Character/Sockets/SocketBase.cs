@@ -23,6 +23,17 @@ public partial class SocketBase // Initialize
 }
 public partial class SocketBase : MonoBehaviour // 
 {
+    public void AttachTransform(Transform wantTransform)
+    {
+        foreach (Transform currentTransform in wantTransform)
+        {
+            currentTransform.gameObject.layer = gameObject.layer;
+        }
+        wantTransform.SetParent(transform);
+        wantTransform.localPosition = Vector3.zero;
+        wantTransform.localRotation = Quaternion.identity;
+        wantTransform.localScale = Vector3.one;
+    }
     public SocketBase GetSocket() => this;
 
     public void GetSockets(List<SocketBase> result) => result.Add(this);
@@ -56,11 +67,11 @@ public partial class SocketBase : MonoBehaviour //
     }
 
     public void SocketAction(Action<SocketBase> wantAction)
-    { if (gameObject.activeInHierarchy) wantAction(this); }
+    { if (enabled) wantAction(this); }
 
     public void SocketActionByType(SocketType wantType, Action<SocketBase> wantAction)
-    { if (gameObject.activeInHierarchy && wantType == SocketType) wantAction(this); }
+    { if (enabled && wantType == SocketType) wantAction(this); }
 
     public void SocketActionByPredicate(Func<SocketBase, bool> predicate, Action<SocketBase> wantAction)
-    { if (gameObject.activeInHierarchy && predicate(this)) wantAction(this); }
+    { if (enabled && predicate(this)) wantAction(this); }
 }

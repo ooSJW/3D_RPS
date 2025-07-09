@@ -21,6 +21,20 @@ public partial class LocalPlayerController : PlayerController // Initialize
             UserInputManager.OnReloadInput -= OnReloadInput;
             UserInputManager.OnReloadInput += OnReloadInput;
 
+            UserInputManager.OnWeapon0Input -= OnWeapon0Input;
+            UserInputManager.OnWeapon0Input += OnWeapon0Input;
+            UserInputManager.OnWeapon1Input -= OnWeapon1Input;
+            UserInputManager.OnWeapon1Input += OnWeapon1Input;
+            UserInputManager.OnWeapon2Input -= OnWeapon2Input;
+            UserInputManager.OnWeapon2Input += OnWeapon2Input;
+            UserInputManager.OnWeapon3Input += OnWeapon3Input;
+            UserInputManager.OnWeapon3Input += OnWeapon3Input;
+            UserInputManager.OnChangeWeaponInput -= OnChangeWeaponInput;
+            UserInputManager.OnChangeWeaponInput += OnChangeWeaponInput;
+
+
+
+
             UserInputManager.OnMenuInput += () => GameManager.SetMouseLock(!GameManager.GetMouseLock());
         }
 
@@ -66,14 +80,12 @@ public partial class LocalPlayerController : PlayerController
         ControlCharacterBase.AddRotation(-inputValue.x, inputValue.y);
     }
 
-    private void OnAttackInput(bool value)
-    {
-        // CharacterBase.Attack에서 OnAttack delegate 호출
-        ControlCharacterBase.Attack(ControlCharacterBase.Forward, value);
-    }
-
-    private void OnReloadInput()
-    {
-        ControlCharacterBase.Reload();
-    }
+    // CharacterBase.Attack에서 OnAttack delegate 호출
+    public void OnAttackInput(bool value) => ControlCharacterBase.Attack(ControlCharacterBase.Forward, value);
+    public void OnReloadInput() => ControlCharacterBase.Reload();
+    public void OnWeapon0Input() => ControlCharacterBase.Weapon(0);
+    public void OnWeapon1Input() => ControlCharacterBase.Weapon(1);
+    public void OnWeapon2Input() => ControlCharacterBase.Weapon(2);
+    public void OnWeapon3Input() => ControlCharacterBase.Weapon(3);
+    public void OnChangeWeaponInput(float value) => ControlCharacterBase.ChangeWeapon(value);
 }

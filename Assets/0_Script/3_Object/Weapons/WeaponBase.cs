@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public enum WeaponType
@@ -19,9 +21,10 @@ public enum BulletHitType
 public delegate void DelegateShotTypeChanged(ShotType newType);
 public delegate void DelegateShotFunction(SocketBase from, Ray ray);
 public delegate void DelegateShotAnimation(AnimationType wantType);
+public delegate void DelegateHitCharacter(CharacterBase hitCharacter, Collider hitCollider, Vector3 hitPoint, Vector3 hitNormal, CharacterPartType hitPartType, float resultDamage);
 
 [RequireComponent(typeof(Animator))]
-public partial class WeaponBase : MonoBehaviour // Data Field
+public partial class WeaponBase : SocketMonoBehaviour // Data Field
 {
     [SerializeField] private WeaponType weaponType;
     [SerializeField] private LayerMask attackMask = -1;
@@ -30,6 +33,7 @@ public partial class WeaponBase : MonoBehaviour // Data Field
     public event DelegateShotTypeChanged OnShotTypeChanged;
     public event DelegateShotFunction OnShotFunction;
     public event DelegateShotAnimation OnShotAnimation;
+    public event DelegateHitCharacter OnHitCharacter;
 
     [SerializeField] private ShotType currentShotType;
     public ShotType CurrentShotType
@@ -104,37 +108,29 @@ public partial class WeaponBase : MonoBehaviour // Data Field
     [SerializeField] string reloadFailAnimation = "ReloadFail";
     [SerializeField] string reloadStartAnimation = "Reload";
 
-    public bool Attackable { get; protected set; }
-    private bool isFiring = false;
 
     private Animator animator;
+    public bool Attackable { get; protected set; }
+    private bool isFiring = false;
+    private bool isReloading = false;
+    private bool isSwitching = false;
+
 }
-public partial class WeaponBase : MonoBehaviour // Initialize
+public partial class WeaponBase  // Initialize
 {
     private void Awake()
     {
+        AddSocket(GetComponentInChildren<SocketBase>());
         animator = GetComponent<Animator>();
         OnShotAnimation -= TriggerWeaponAnimation;
         OnShotAnimation += TriggerWeaponAnimation;
         // 에디터에 설정한 값 적용, index반영, 예외처리, ShotType변경 이벤트 호출
         CurrentShotType = CurrentShotType;
         BulletHitType = BulletHitType;
-    }
-    private void Allocate()
-    {
-
-    }
-    public void Initialize()
-    {
-        Allocate();
-        Setup();
-    }
-    private void Setup()
-    {
-
+        magazineCurren = magazineMax;
     }
 }
-public partial class WeaponBase : MonoBehaviour // 
+public partial class WeaponBase  // 
 {
     public virtual AnimationType GetWeaponAnimationType()
     {
@@ -155,6 +151,7 @@ public partial class WeaponBase : MonoBehaviour //
     /// <returns>시작할 애니메이션 이름</returns>
     public virtual string ReloadStart(int spareAmmo)
     {
+        isReloading = true;
         if (spareAmmo <= 0 || magazineCurren >= magazineMax)
             return reloadFailAnimation;
         else
@@ -166,14 +163,39 @@ public partial class WeaponBase : MonoBehaviour //
     /// <returns>장전에 사용한 탄 수</returns>
     public virtual int ReloadComplete(int spareAmmo)
     {
+        // 예외처리 ( 1번 총 장전 중 2번 총으로 바꿨을 때 2번 총이 장전되는 경우 방지 )
+        if (!isReloading) return 0;
+
         int filledCount = Mathf.Min(magazineMax - magazineCurren, spareAmmo);
         magazineCurren += filledCount;
+        isReloading = false;
         return filledCount;
     }
 
-
-
     public virtual void ChangeShotType() => CurrentShotIndex++;
+
+    public virtual void DrawStart()
+    {
+        isSwitching = true;
+    }
+
+    public virtual void DrawComplete()
+    {
+        isSwitching = false;
+    }
+
+    public virtual void HolsteringStart()
+    {
+        isSwitching = true;
+        isFiring = false;
+        isReloading = false;
+    }
+
+    public virtual void HolsteringComplete()
+    {
+        isSwitching = false;
+    }
+
 
     public virtual void ShotStart(SocketBase from)
     {
@@ -227,21 +249,25 @@ public partial class WeaponBase : MonoBehaviour //
     // and : 왼쪽 부터 flat를 만나는 순간 종료 => false가능성이 가장 높고 빠른 연산을 왼쪽에 두는 것이 성능에 유리함
     public virtual void Shot(SocketBase from, bool force = false)
     {
-        if (force || shotDelayLeft == currentTime || shotDelayLeft + shotDelayMax <= currentTime)
+        if (magazineCurren > 0 && !isReloading)
         {
-            ShotAnimation();
-            accumulateShotTime = currentTime - startShotTime;
-            Vector3 originDirection = from.transform.forward;
-            Ray ray = new(from.transform.position, originDirection);
-
-            for (int i = 0; i < shotAmount; i++)
+            if (force || shotDelayLeft == currentTime || shotDelayLeft + shotDelayMax <= currentTime)
             {
-                Vector2 rand = UnityEngine.Random.insideUnitCircle * new Vector2(shotVerticalSpread, shotHorizontalSpread);
-                ray.direction = originDirection.Rotation(rand.x, rand.y);
+                magazineCurren--;
+                ShotAnimation();
+                accumulateShotTime = currentTime - startShotTime;
+                Vector3 originDirection = from.transform.forward;
+                Ray ray = new(from.transform.position, originDirection);
 
-                OnShotFunction(from, ray);
+                for (int i = 0; i < shotAmount; i++)
+                {
+                    Vector2 rand = UnityEngine.Random.insideUnitCircle * new Vector2(shotVerticalSpread, shotHorizontalSpread);
+                    ray.direction = originDirection.Rotation(rand.x, rand.y);
+
+                    OnShotFunction(from, ray);
+                }
+                shotDelayLeft = currentTime;
             }
-            shotDelayLeft = currentTime;
         }
     }
 
@@ -258,7 +284,8 @@ public partial class WeaponBase : MonoBehaviour //
     {
         if (ray.CurveCastWithDebug(out RaycastHit hit, 20.0f, attackMask, trajectoryCurve, 8, 1.0f))
         {
-            Hit(hit.rigidbody?.gameObject, hit.point, hit.normal);
+            // 부모로 올라가며 가장 먼저 마주치는 rigid
+            Hit(hit.rigidbody?.gameObject, hit.collider, hit.point, hit.normal);
         }
     }
 
@@ -267,13 +294,37 @@ public partial class WeaponBase : MonoBehaviour //
 
     }
 
-    public virtual void Hit(GameObject hitTarget, Vector3 hitPoint, Vector3 hitNormal)
+    public virtual void Hit(GameObject hitTarget, Collider hitCollider, Vector3 hitPoint, Vector3 hitNormal)
     {
-        PoolManager.ClaimSpawn(EffectType.BulletHitEffect.ToString(), hitPoint + (hitPoint * 0.01f), Quaternion.LookRotation(-hitNormal));
+        if (hitTarget?.TryGetComponent(out CharacterBase hitCharacter) is not null)
+        {
+            CharacterParts hitPart = hitCollider.GetComponent<CharacterParts>();
+            HitCharacter(hitCharacter, hitPart, hitCollider, hitPoint, hitNormal);
+        }
+        else
+        {
+            HitObject(hitTarget, hitCollider, hitPoint, hitNormal);
+        }
     }
+
+    private void HitCharacter(CharacterBase hitCharacter, CharacterParts hitPart, Collider hitCollider, Vector3 hitPoint, Vector3 hitNormal)
+    {
+        GameObject inst = PoolManager.ClaimSpawn(EffectType.BulletFleshEffect.ToString(), hitPoint + (hitNormal * 0.01f), Quaternion.LookRotation(-hitNormal));
+        inst.transform.SetParent(hitCollider.transform);
+        float resultDamage = UnityEngine.Random.Range(damageMin, damageMax);
+        CharacterPartType hitPartType = hitPart?.CharacterPartType ?? CharacterPartType.None;
+        OnHitCharacter?.Invoke(hitCharacter, hitCollider, hitPoint, hitNormal, hitPartType, resultDamage);
+    }
+
+    private void HitObject(GameObject hitTarget, Collider hitCollider, Vector3 hitPoint, Vector3 hitNormal)
+    {
+        PoolManager.ClaimSpawn(EffectType.BulletHitEffect.ToString(), hitPoint + (hitNormal * 0.01f), Quaternion.LookRotation(-hitNormal));
+    }
+
+
 }
 
-public partial class WeaponBase : MonoBehaviour // Coroutine
+public partial class WeaponBase // Coroutine
 {
     public virtual IEnumerator BurstCoroutine(SocketBase from)
     {

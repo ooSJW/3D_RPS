@@ -24,6 +24,7 @@ public partial class PoolManagerEditor : Editor // Editor 상속
     private TableState characterTable;
     private TableState controllerTable;
     private TableState effectTable;
+    private TableState objectTable;
 }
 
 public partial class PoolManagerEditor : Editor // Main
@@ -36,6 +37,7 @@ public partial class PoolManagerEditor : Editor // Main
         characterTable.Set(serializedObject.FindProperty("requestCharacter"));
         controllerTable.Set(serializedObject.FindProperty("requestController"));
         effectTable.Set(serializedObject.FindProperty("requestEffect"));
+        objectTable.Set(serializedObject.FindProperty("requestObject"));
     }
 }
 
@@ -48,6 +50,7 @@ public partial class PoolManagerEditor : Editor // Property
         DrawTable(ref characterTable);
         DrawTable(ref controllerTable);
         DrawTable(ref effectTable);
+        DrawTable(ref objectTable);
 
         // 변경된 사항을 실제 오브젝트에 적용.
         serializedObject.ApplyModifiedProperties();

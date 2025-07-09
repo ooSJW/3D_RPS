@@ -15,6 +15,8 @@ public partial class CharacterMeshModule : CharacterModuleBase // Property
     [SerializeField] private bool otherPlayerVisible;
 
     protected Animator animator;
+
+    private bool isVisible = false;
 }
 
 
@@ -33,8 +35,12 @@ public partial class CharacterMeshModule : CharacterModuleBase // Property
             Owner.OnOwnerChanged += OwnerChanged;
             Owner.OnAim -= ForwardChanged;
             Owner.OnAim += ForwardChanged;
+            Owner.OnSpeedChanged -= SpeedChanged;
+            Owner.OnSpeedChanged += SpeedChanged;
             Owner.OnAnimationTrigger -= animator.SetTrigger;
             Owner.OnAnimationTrigger += animator.SetTrigger;
+            OnReloadComplete -= Owner.ReloadComplete;
+            OnReloadComplete += Owner.ReloadComplete;
             GameManager.OnCharacterUpdate -= ForwardUpdate;
             GameManager.OnCharacterUpdate += ForwardUpdate;
         }
@@ -46,7 +52,9 @@ public partial class CharacterMeshModule : CharacterModuleBase // Property
         {
             Owner.OnOwnerChanged -= OwnerChanged;
             Owner.OnAim -= ForwardChanged;
+            Owner.OnSpeedChanged -= SpeedChanged;
             Owner.OnAnimationTrigger -= animator.SetTrigger;
+            OnReloadComplete -= Owner.ReloadComplete;
             GameManager.OnCharacterUpdate -= ForwardUpdate;
         }
 
@@ -63,19 +71,37 @@ public partial class CharacterMeshModule : CharacterModuleBase // Property
         forward = wantForward;
     }
 
+    private void SpeedChanged(Vector3 newVelocity)
+    {
+        animator.SetFloat("MovementSpeed", newVelocity.magnitude);
+        animator.SetFloat("MovementForward", newVelocity.z);
+        animator.SetFloat("MovementRight", newVelocity.x);
+    }
+
     private void OwnerChanged(ControllerBase newController)
     {
         bool isLocalPlayer = newController as LocalPlayerController;
-        bool isVisible = localPlayerVisible && isLocalPlayer;
+        isVisible = localPlayerVisible && isLocalPlayer;
         isVisible |= otherPlayerVisible && !isLocalPlayer;
-
-        gameObject.SetActive(isVisible);
+        foreach (Renderer currentRenderer in GetComponentsInChildren<Renderer>())
+        {
+            currentRenderer.enabled = isVisible;
+        }
+        foreach (SocketBase currentSocket in GetComponentsInChildren<SocketBase>())
+        {
+            currentSocket.enabled = isVisible;
+        }
+        //gameObject.SetActive(isVisible);
     }
 
     public virtual void NoticeReloadComplete()
     {
         OnReloadComplete?.Invoke();
-        Debug.Log("¿Â¿¸");
     }
 
+    public virtual void OnDrawStart() { if (isVisible) Debug.Log(" OnDrawStart "); }
+    public virtual void OnDrawEnd() { if (isVisible) Debug.Log(" OnDrawEnd "); }
+
+    public virtual void OnHolsteringStart() { if (isVisible) Debug.Log(" OnHolsteringStart "); }
+    public virtual void OnHolsteringEnd() { if (isVisible) Debug.Log(" OnHolsteringEnd "); }
 }

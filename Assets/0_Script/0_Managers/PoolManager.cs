@@ -13,6 +13,8 @@ public struct PoolRequestCharacter { public CharacterType wantType; public int a
 public struct PoolRequestController { public ControllerType wantType; public int amount; }
 [System.Serializable]
 public struct PoolRequestEffect { public EffectType wantType; public int amount; }
+[System.Serializable]
+public struct PoolRequestObject { public ObjectType wantType; public int amount; }
 
 
 public delegate GameObject DelegateSpawn(string name, Vector3 position, Quaternion rotation, Vector3 scale, Transform parent, Space coord);
@@ -27,6 +29,7 @@ public partial class PoolManager : MonoBehaviour, IManagerBase // Data Field
     [SerializeField] private PoolRequestCharacter[] requestCharacter = new PoolRequestCharacter[0];
     [SerializeField] private PoolRequestController[] requestController = new PoolRequestController[0];
     [SerializeField] private PoolRequestEffect[] requestEffect = new PoolRequestEffect[0];
+    [SerializeField] private PoolRequestObject[] requestObject = new PoolRequestObject[0];
 
     private Dictionary<string, Queue<GameObject>> poolableObjectDict = new();
 
@@ -69,6 +72,14 @@ public partial class PoolManager : MonoBehaviour, IManagerBase // Initialize
             (
             FileManager.GetEffectPrefab(currentEffect.wantType),
             currentEffect.amount
+             );
+        }
+        foreach (var currentObject in requestObject)
+        {
+            RegisterPoolObject
+            (
+            FileManager.GetPrefab(currentObject.wantType),
+            currentObject.amount
              );
         }
 

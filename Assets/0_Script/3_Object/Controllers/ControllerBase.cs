@@ -6,6 +6,8 @@ public delegate void DelegatePossessWithID(CharacterBase target, int id);
 public delegate void DelegateUnPossess(CharacterBase target);
 public delegate void DelegateUnPossessWithID(CharacterBase target, int id);
 
+public delegate void DelegateOnCharacterDie(ControllerBase controller);
+
 public partial class ControllerBase : MonoBehaviour // Data Field
 {
     public CharacterBase ControlCharacterBase { get; protected set; }
@@ -18,6 +20,7 @@ public partial class ControllerBase : MonoBehaviour // Data Field
 
     public event DelegateUnPossess OnUnPossess;
     public event DelegateUnPossessWithID OnUnPossessWithID;
+
 }
 
 public partial class ControllerBase : MonoBehaviour // Initialize
@@ -34,8 +37,12 @@ public partial class ControllerBase : MonoBehaviour // Initialize
         target.PossessedBy(this);
         ControlCharacterBase = target;
 
+        ControlCharacterBase.OnDie -= OnCharacterDie;
+        ControlCharacterBase.OnDie += OnCharacterDie;
+
         OnPossess?.Invoke(ControlCharacterBase);
         OnPossessWithID?.Invoke(ControlCharacterBase, controllerId);
+
 
         return ControlCharacterBase;
     }
@@ -44,6 +51,7 @@ public partial class ControllerBase : MonoBehaviour // Initialize
     {
         if (ControlCharacterBase is not null)
         {
+            ControlCharacterBase.OnDie -= OnCharacterDie;
             OnUnPossess?.Invoke(ControlCharacterBase);
             OnUnPossessWithID?.Invoke(ControlCharacterBase, controllerId);
         }
