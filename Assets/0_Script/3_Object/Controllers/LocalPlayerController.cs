@@ -68,6 +68,7 @@ public partial class LocalPlayerController : PlayerController
     }
     private void OnLookInput(Vector2 inputValue)
     {
+        /*회전
         // 회전 : Roll Pitch Yaw
         // Roll : 갸웃 fps의 qe
         // Pitch : 끄덕끄덕
@@ -76,8 +77,12 @@ public partial class LocalPlayerController : PlayerController
         // 마우스 상하(y) : pitch
         // -는 움직이는 주체에 따라 -하거나 그대로 전달.
         // * 감도
+        */
         inputValue *= 0.5f;
         ControlCharacterBase.AddRotation(-inputValue.x, inputValue.y);
+
+        Transform cameraTransform = Camera.main.transform;
+        ControlCharacterBase.focusLocation = cameraTransform.position + (cameraTransform.forward * 50);
     }
 
     // CharacterBase.Attack에서 OnAttack delegate 호출

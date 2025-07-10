@@ -9,6 +9,7 @@ public partial class CharacterAttackModule : CharacterModuleBase
     [SerializeField] private LayerMask attackMask;
 
     [SerializeField] private ObjectType[] weaponTypes;
+    private Vector3? attackDirection = null;
 
     private WeaponBase[] weapons;
     int weaponIndex = -1;
@@ -22,7 +23,20 @@ public partial class CharacterAttackModule : CharacterModuleBase
             value = value % weapons.Length;
             if (value < 0) value += weapons.Length;
 
-            CurrentWeapon = weapons[weaponIndex = value];
+            NextWeapon = weapons[weaponIndex = value];
+        }
+    }
+    private WeaponBase nextWeapon;
+    public WeaponBase NextWeapon
+    {
+        get => nextWeapon;
+        set
+        {
+            if (nextWeapon == value || currentWeapon == value) return;
+
+            StartWeaponSwap(value?.GetWeaponAnimationType().ToString(), nextWeapon?.GetWeaponAnimationType().ToString());
+
+            nextWeapon = value;
         }
     }
 
@@ -49,27 +63,29 @@ public partial class CharacterAttackModule : CharacterModuleBase
     public void DisConnectWeapon(WeaponBase oldWeapon)
     {
         oldWeapon.gameObject.SetActive(false);
-        oldWeapon.HolsteringStart();
         if (Owner)
         {
             oldWeapon.OnShotAnimation -= Owner.AnimationPlay;
-            Owner.AnimationPlay(AnimationType.Holstering);
+            oldWeapon.OnGetShotPosition -= GetShotPosition;
         }
         oldWeapon.OnHitCharacter -= OnHitCharacter;
     }
 
     public void ConnectWeapon(WeaponBase newWeapon)
     {
+        if (newWeapon is null) return;
+
         newWeapon.gameObject.SetActive(true);
-        newWeapon.DrawStart();
         if (Owner)
         {
             newWeapon.OnShotAnimation -= Owner.AnimationPlay;
             newWeapon.OnShotAnimation += Owner.AnimationPlay;
-            Owner.AnimationPlay(newWeapon.GetWeaponAnimationType());
+            newWeapon.OnGetShotPosition -= GetShotPosition;
+            newWeapon.OnGetShotPosition += GetShotPosition;
         }
         newWeapon.OnHitCharacter -= OnHitCharacter;
         newWeapon.OnHitCharacter += OnHitCharacter;
+        if (attackDirection is not null) OnAttack(attackDirection.Value, true);
     }
 
     public void RefreshWeapon() => CurrentWeapon = CurrentWeapon;
@@ -89,7 +105,6 @@ public partial class CharacterAttackModule : CharacterModuleBase
                 weapons[i].gameObject.SetActive(false);
             }
         }
-
         SetWeapon(0);
     }
 
@@ -106,6 +121,8 @@ public partial class CharacterAttackModule : CharacterModuleBase
             Owner.OnAttack += OnAttack;
             Owner.OnReload -= OnReloadStart;
             Owner.OnReload += OnReloadStart;
+            Owner.OnWeaponSwap -= OnWeaponSwap;
+            Owner.OnWeaponSwap += OnWeaponSwap;
             Owner.OnReloadComplete -= OnReloadComplete;
             Owner.OnReloadComplete += OnReloadComplete;
             GameManager.OnObjectUpdate -= OnUpdate;
@@ -122,6 +139,7 @@ public partial class CharacterAttackModule : CharacterModuleBase
             Owner.OnWeapon -= SetWeapon;
             Owner.OnAttack -= OnAttack;
             Owner.OnReload -= OnReloadStart;
+            Owner.OnWeaponSwap -= OnWeaponSwap;
             Owner.OnReloadComplete -= OnReloadComplete;
             GameManager.OnObjectUpdate -= OnUpdate;
         }
@@ -136,12 +154,53 @@ public partial class CharacterAttackModule : CharacterModuleBase
         }
     }
 
+    public virtual void StartWeaponSwap(string? newWeaponTrigger, string? cancelWeaponTrigger)
+    {
+        if (string.IsNullOrEmpty(cancelWeaponTrigger))
+        {
+            if (currentWeapon is not null)
+                Owner.AnimationPlay(AnimationType.Holstering);
+        }
+        else
+        {
+            Owner.AnimationCancel(cancelWeaponTrigger);
+        }
+        if (!string.IsNullOrEmpty(newWeaponTrigger)) Owner.AnimationPlay(newWeaponTrigger);
+    }
+
+    public virtual Vector3 GetShotPosition(SocketBase from)
+    {
+        return Owner.focusLocation;
+    }
+
+    public virtual void OnWeaponSwap(SwapState currentState)
+    {
+        switch (currentState)
+        {
+            case SwapState.HolsteringStart:
+                CurrentWeapon?.HolsteringStart();
+                break;
+            case SwapState.HolsteringEnd:
+                CurrentWeapon?.HolsteringComplete();
+                break;
+            case SwapState.DrawStart:
+                NextWeapon?.DrawStart();
+                CurrentWeapon = nextWeapon;
+                NextWeapon = null;
+                break;
+            case SwapState.DrawEnd:
+                CurrentWeapon?.DrawComplete();
+                break;
+        }
+    }
+
+
     public virtual void OnReloadStart()
     {
         if (Owner && currentWeapon)
         {
             string animationName = currentWeapon.ReloadStart(Owner.GetSpareAmmo(currentWeapon.RequireAmmo));
-            Owner.AnimationPlay(animationName);
+            if (!string.IsNullOrEmpty(animationName)) Owner.AnimationPlay(animationName);
         }
     }
 
@@ -156,6 +215,8 @@ public partial class CharacterAttackModule : CharacterModuleBase
 
     public virtual void OnAttack(Vector3 direction, bool isDown)
     {
+        attackDirection = isDown ? direction : null;
+
         if (Owner is not null && currentWeapon is not null)
         {
             Action<SocketBase> attackAction = isDown ? currentWeapon.ShotStart : currentWeapon.ShotEnd;

@@ -20,8 +20,8 @@ public delegate void DelegateCharacterOwnerChanged(ControllerBase newController)
 
 public delegate int DelegateCharacterGetDamage(float damage, Vector3 direction, CharacterPartType partType, bool isCritical, GameObject causer);
 public delegate void DelegateCharacterCalculateDamage(ref float totalDamage, CharacterPartType partType, ref float multiplier, ref bool isCritical);
-public delegate void DelegatCharacterAnimaionPlay(AnimationType wanType);
-public delegate void DelegatCharacterAnimaionTrigger(string wantTrigger);
+public delegate void DelegateCharacterAnimaionPlay(AnimationType wanType);
+public delegate void DelegateCharacterAnimationTrigger(string wantTrigger);
 
 public partial class CharacterBase : SocketMonoBehaviour, IPoolable // Delegate
 {
@@ -34,6 +34,7 @@ public partial class CharacterBase : SocketMonoBehaviour, IPoolable // Delegate
 
     public event DelegateCharacterWeapon OnWeapon;
     public event DelegateCharacterChangeWeapon OnChangeWeapon;
+    public event DelegateWeaponSwap OnWeaponSwap;
 
     public event DelegateCharacterReload OnReload;
     public event DelegateCharacterReload OnReloadComplete;
@@ -46,7 +47,8 @@ public partial class CharacterBase : SocketMonoBehaviour, IPoolable // Delegate
 
     public event DelegateCharacterOwnerChanged OnOwnerChanged;
 
-    public event DelegatCharacterAnimaionTrigger OnAnimationTrigger;
+    public event DelegateCharacterAnimationTrigger OnAnimationTrigger;
+    public event DelegateCharacterAnimationTrigger OnAnimationCancel;
 }
 
 public partial class CharacterBase// Data Field
@@ -62,8 +64,10 @@ public partial class CharacterBase// Data Field
     public Vector3 MoveVelocity { get; protected set; }
     public Vector3 MoveDirection { get; protected set; }
 
+    public Vector3 focusLocation;
+
+    
     protected Vector3 forward = Vector3.forward;
-    protected Vector3 right = Vector3.right;
     public Vector3 Forward
     {
         get => forward;
@@ -76,6 +80,8 @@ public partial class CharacterBase// Data Field
             right.z = -forward.x;
         }
     }
+
+    protected Vector3 right = Vector3.right;
     public Vector3 Right
     {
         get => right;
@@ -146,6 +152,8 @@ public partial class CharacterBase
         Controller = null;
         OnOwnerChanged?.Invoke(Controller);
     }
+    public virtual void AnimationCancel(AnimationType wantType) => AnimationCancel(wantType.ToString());
+    public virtual void AnimationCancel(string wantTrigger) => OnAnimationCancel?.Invoke(wantTrigger);
     public virtual void AnimationPlay(AnimationType wantType)
     {
         AnimationPlay(wantType.ToString());
@@ -194,6 +202,7 @@ public partial class CharacterBase // Delegate
     public void ChangeWeapon(float value) => OnChangeWeapon?.Invoke(value);
     public void Reload() => OnReload?.Invoke();
     public void ReloadComplete() => OnReloadComplete?.Invoke();
+    public void WeaponSwap(SwapState currentState) => OnWeaponSwap?.Invoke(currentState);
     public void Run(bool value) => OnRun?.Invoke(value);
     public void Die()
     {

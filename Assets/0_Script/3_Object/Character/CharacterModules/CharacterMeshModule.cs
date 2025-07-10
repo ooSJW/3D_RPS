@@ -1,12 +1,22 @@
+using System;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 
+public enum SwapState
+{
+    Complete, HolsteringStart, HolsteringEnd, DrawStart, DrawEnd
+}
+
+
+public delegate void DelegateWeaponSwap(SwapState currentState);
 public delegate void DelegateReloadComplete();
+
 
 [RequireComponent(typeof(Animator))]
 public partial class CharacterMeshModule : CharacterModuleBase // Property
 {
     public event DelegateReloadComplete OnReloadComplete;
+    public event DelegateWeaponSwap OnWeaponSwap;
 
     [SerializeField] protected float rotateSpeed = 10;
     protected Vector3 forward;
@@ -39,6 +49,10 @@ public partial class CharacterMeshModule : CharacterModuleBase // Property
             Owner.OnSpeedChanged += SpeedChanged;
             Owner.OnAnimationTrigger -= animator.SetTrigger;
             Owner.OnAnimationTrigger += animator.SetTrigger;
+            Owner.OnAnimationCancel -= animator.ResetTrigger;
+            Owner.OnAnimationCancel += animator.ResetTrigger;
+            OnWeaponSwap -= Owner.WeaponSwap;
+            OnWeaponSwap += Owner.WeaponSwap;
             OnReloadComplete -= Owner.ReloadComplete;
             OnReloadComplete += Owner.ReloadComplete;
             GameManager.OnCharacterUpdate -= ForwardUpdate;
@@ -54,6 +68,8 @@ public partial class CharacterMeshModule : CharacterModuleBase // Property
             Owner.OnAim -= ForwardChanged;
             Owner.OnSpeedChanged -= SpeedChanged;
             Owner.OnAnimationTrigger -= animator.SetTrigger;
+            Owner.OnAnimationCancel -= animator.ResetTrigger;
+            OnWeaponSwap -= Owner.WeaponSwap;
             OnReloadComplete -= Owner.ReloadComplete;
             GameManager.OnCharacterUpdate -= ForwardUpdate;
         }
@@ -99,9 +115,14 @@ public partial class CharacterMeshModule : CharacterModuleBase // Property
         OnReloadComplete?.Invoke();
     }
 
-    public virtual void OnDrawStart() { if (isVisible) Debug.Log(" OnDrawStart "); }
-    public virtual void OnDrawEnd() { if (isVisible) Debug.Log(" OnDrawEnd "); }
+    public virtual void WeaponSwap(SwapState currentState)
+    {
+        if (isVisible) OnWeaponSwap?.Invoke(currentState);
+    }
 
-    public virtual void OnHolsteringStart() { if (isVisible) Debug.Log(" OnHolsteringStart "); }
-    public virtual void OnHolsteringEnd() { if (isVisible) Debug.Log(" OnHolsteringEnd "); }
+    public virtual void OnDrawStart() { WeaponSwap(SwapState.DrawStart); }
+    public virtual void OnDrawEnd() { WeaponSwap(SwapState.DrawEnd); }
+
+    public virtual void OnHolsteringStart() { WeaponSwap(SwapState.HolsteringStart); }
+    public virtual void OnHolsteringEnd() { WeaponSwap(SwapState.HolsteringEnd); }
 }

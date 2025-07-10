@@ -22,6 +22,8 @@ public delegate void DelegateShotTypeChanged(ShotType newType);
 public delegate void DelegateShotFunction(SocketBase from, Ray ray);
 public delegate void DelegateShotAnimation(AnimationType wantType);
 public delegate void DelegateHitCharacter(CharacterBase hitCharacter, Collider hitCollider, Vector3 hitPoint, Vector3 hitNormal, CharacterPartType hitPartType, float resultDamage);
+public delegate Vector3 DelegateGetShotPosition(SocketBase from);
+
 
 [RequireComponent(typeof(Animator))]
 public partial class WeaponBase : SocketMonoBehaviour // Data Field
@@ -34,6 +36,7 @@ public partial class WeaponBase : SocketMonoBehaviour // Data Field
     public event DelegateShotFunction OnShotFunction;
     public event DelegateShotAnimation OnShotAnimation;
     public event DelegateHitCharacter OnHitCharacter;
+    public event DelegateGetShotPosition OnGetShotPosition;
 
     [SerializeField] private ShotType currentShotType;
     public ShotType CurrentShotType
@@ -111,10 +114,11 @@ public partial class WeaponBase : SocketMonoBehaviour // Data Field
 
     private Animator animator;
     public bool Attackable { get; protected set; }
+    public bool IsActing => isSwitching || isReloading;
+    public bool IsFiring => isFiring;
     private bool isFiring = false;
     private bool isReloading = false;
     private bool isSwitching = false;
-
 }
 public partial class WeaponBase  // Initialize
 {
@@ -132,6 +136,19 @@ public partial class WeaponBase  // Initialize
 }
 public partial class WeaponBase  // 
 {
+    public virtual Vector3 GetShotPosition(SocketBase from)
+    {
+        if (OnGetShotPosition is not null)
+        {
+            return OnGetShotPosition(from);
+        }
+        else
+        {
+            Transform fromTransform = from.transform;
+            return fromTransform.position + fromTransform.forward;
+        }
+    }
+
     public virtual AnimationType GetWeaponAnimationType()
     {
         switch (weaponType)
@@ -151,7 +168,10 @@ public partial class WeaponBase  //
     /// <returns>시작할 애니메이션 이름</returns>
     public virtual string ReloadStart(int spareAmmo)
     {
+        if (IsActing) return string.Empty;
+
         isReloading = true;
+
         if (spareAmmo <= 0 || magazineCurren >= magazineMax)
             return reloadFailAnimation;
         else
@@ -249,14 +269,21 @@ public partial class WeaponBase  //
     // and : 왼쪽 부터 flat를 만나는 순간 종료 => false가능성이 가장 높고 빠른 연산을 왼쪽에 두는 것이 성능에 유리함
     public virtual void Shot(SocketBase from, bool force = false)
     {
+        Shot(from, GetShotPosition(from), force);
+    }
+
+    public virtual void Shot(SocketBase from, Vector3 position, bool force = false)
+    {
         if (magazineCurren > 0 && !isReloading)
         {
-            if (force || shotDelayLeft == currentTime || shotDelayLeft + shotDelayMax <= currentTime)
+            if (!IsActing &&
+                force ||
+                shotDelayLeft == currentTime || shotDelayLeft + shotDelayMax <= currentTime)
             {
                 magazineCurren--;
                 ShotAnimation();
                 accumulateShotTime = currentTime - startShotTime;
-                Vector3 originDirection = from.transform.forward;
+                Vector3 originDirection = (position - from.transform.position).normalized;
                 Ray ray = new(from.transform.position, originDirection);
 
                 for (int i = 0; i < shotAmount; i++)
